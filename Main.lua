@@ -1258,75 +1258,72 @@ Opition1_3.FocusLost:Connect(function(enter)
 end)
 
 local RunService = game:GetService("RunService")
-function buildBlock(cframe, blacklist)
-	-- Chuẩn bị các tham số để gửi đến server
+function buildBlock(cframe,blacklist)
 	local args = {
 		[1] = "PlasticBlock",
 		[2] = game:GetService("Players").LocalPlayer.Data.PlasticBlock.Value,
 		[3] = myzone,
-		[4] = CFrame.new(cframe.Position - myzone.Position),
+		[4] = CFrame.new(cframe.Position-myzone.Position),
 		[5] = true,
 		[6] = cframe,
 		[7] = false
 	}
-
-	-- Tìm RemoteFunction một cách an toàn
+	-- cframe*myzone.CFrame:Inverse()
 	local rfevent
-	if game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("BuildingTool") then
+	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("BuildingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Character.BuildingTool.RF
 	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("BuildingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Backpack.BuildingTool.RF
 	else
-		-- Nếu không tìm thấy, cảnh báo và thoát sớm
-		warn("Không thể tìm thấy BuildingTool's RF.")
-		return nil
+		ImageLoader:Destroy()
+		warn("cant find rfevent.")
+		return
 	end
 
-	-- Gửi yêu cầu tới server trong một luồng mới để không chặn luồng chính
+	local block
+	local connect
+	local a = Instance.new("BindableEvent")
+	connect = workspace.Blocks[game.Players.LocalPlayer.Name].ChildAdded:Connect(function(v)
+		if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and v.PPart.Position == cframe.Position then
+			block=v
+			a:Fire()
+			connect:Disconnect()
+		end
+	end)
+
+	local succes = false
+	delay(1,function()
+		if not succes then
+			local overla = OverlapParams.new()
+			overla.FilterType=Enum.RaycastFilterType.Exclude
+			overla.FilterDescendantsInstances=blacklist
+			local parts = workspace:GetPartBoundsInBox(cframe,Vector3.new(scale,scale,scale),overla)
+			for i,e in pairs(parts) do
+				local v = e.Parent
+				if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and e.Position == cframe.Position then
+					block=v
+					a:Fire()
+					connect:Disconnect()
+					return block
+				end
+			end
+			-- look fail let do again
+			connect:Disconnect()
+			block = buildBlock(cframe,blacklist)
+			a:Fire()
+		end
+	end)
+	ImageLoader.Destroying:Connect(function()
+		if not succes then
+			-- oh no
+			a:Fire()
+		end
+	end)
 	task.spawn(function()
 		rfevent:InvokeServer(unpack(args))
 	end)
-
-	-- =================================================================
-	-- Bắt đầu vòng lặp kiểm tra để tìm block vừa được tạo
-	-- =================================================================
-
-	local startTime = os.clock() -- Ghi lại thời điểm bắt đầu để tính timeout
-	local timeout = 5 -- Thời gian chờ tối đa (giây). Tăng nếu mạng chậm.
-
-	-- Cấu hình bộ lọc cho việc quét vùng
-	local overla = OverlapParams.new()
-	overla.FilterType = Enum.RaycastFilterType.Exclude
-	overla.FilterDescendantsInstances = blacklist -- Bỏ qua các block đã có trong blacklist
-
-	local block -- Biến để lưu trữ block khi tìm thấy
-
-	-- Vòng lặp sẽ chạy cho đến khi tìm thấy block HOẶC hết thời gian chờ
-	repeat
-		-- Sử dụng GetPartBoundsInBox để quét vùng xung quanh CFrame một cách hiệu quả
-		local partsInBox = workspace:GetPartBoundsInBox(cframe, Vector3.new(scale, scale, scale), overla)
-
-		for _, part in ipairs(partsInBox) do
-			local v = part.Parent
-
-			-- Kiểm tra nghiêm ngặt để đảm bảo tìm đúng block
-			if v and v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name then
-				-- So sánh vị trí bằng Magnitude để tránh lỗi dấu phẩy động (đáng tin cậy hơn so với so sánh trực tiếp)
-				if (v.PPart.Position - cframe.Position).Magnitude < 0.1 then
-					block = v -- Tìm thấy rồi!
-					break -- Thoát khỏi vòng lặp 'for'
-				end
-			end
-		end
-
-		-- Nếu chưa tìm thấy, đợi khung hình tiếp theo rồi mới kiểm tra lại
-		if not block then
-			RunService.Heartbeat:Wait()
-		end
-
-	until block or (os.clock() - startTime > timeout) -- Điều kiện dừng vòng lặp
-
-	-- Nếu sau khi kết thúc vòng lặp mà vẫn không tìm thấy block, hàm sẽ trả về nil
+	a.Event:Wait()
+	succes = true
 	return block
 end
 function paintblock(block,color)
