@@ -1085,75 +1085,42 @@ Icon.Image = getcustomasset("ImageLoaderBabft/icon.png")
 Minimize.Image = getcustomasset("ImageLoaderBabft/minimize.png")
 Close.Image = getcustomasset("ImageLoaderBabft/close.png")
 
--- [MỚI] Tải cả hai bộ giải mã PNG và JPEG
 local PNG = loadstring(game:HttpGet("https://raw.githubusercontent.com/HairBaconGamming/PNG-Reader-Roblox-Exploit/main/Main.lua"))()
-local JPEG = loadstring(game:HttpGet("https://raw.githubusercontent.com/HairBaconGamming/PNG-Reader-Roblox-Exploit/refs/heads/main/JPEG.lua"))()
-local ImageDecoder -- Biến này sẽ giữ bộ giải mã chính xác (PNG hoặc JPEG)
 
-local MyImageData = { -- Đổi tên từ MyPNGdata để chung chung hơn
+local MyPNGdata = {
 	["Data"] = '',
-	["Image"] = {}
+	["PNG"] = {}
 }
 
--- [ĐÃ SỬA] Hàm để giải mã và hiển thị thông tin ảnh
-local function UpdateImageInfo(imageDataString)
-	local decoded, decoderModule
-
-	-- Tự động phát hiện định dạng file dựa trên "magic numbers"
-	if imageDataString:sub(1, 4) == "\137PNG" then
-		decoderModule = PNG
-	elseif imageDataString:sub(1, 2) == "\255\216" then
-		decoderModule = JPEG
-	else
-		warn("Định dạng file không được hỗ trợ hoặc file bị lỗi.")
-		return false
-	end
-
-	-- Sử dụng pcall để giải mã một cách an toàn
-	local success, result = pcall(function()
-		return decoderModule.new(imageDataString)
-	end)
-
-	if not success or not result then
-		warn("Lỗi khi giải mã ảnh: " .. tostring(result))
-		return false
-	end
-
-	decoded = result
-	ImageDecoder = decoderModule -- Lưu lại bộ giải mã đã dùng
-	MyImageData.Data = imageDataString
-	MyImageData.Image = decoded
-
-	-- Cập nhật giao diện người dùng (GUI)
+if isfile("ImageLoaderBabft/preview.png") then
+	MyPNGdata.Data = readfile("ImageLoaderBabft/preview.png")
+	local data = PNG.new(MyPNGdata.Data)
 	local ascale = {
-		decoded.Width / 150,
-		decoded.Height / 150,
+		data.Width/150,
+		data.Height/150,
 	}
-	if decoded.Width > 150 then
-		Result.Size = UDim2.fromOffset(decoded.Width / ascale[1], decoded.Height / ascale[1])
-		if decoded.Height > 150 then
-			Result.Size = UDim2.fromOffset(decoded.Width / ascale[1] / ascale[2], decoded.Height / ascale[1] / ascale[2])
+	if data.Width > 150 then
+		Result.Size = UDim2.fromOffset(data.Width/ascale[1],data.Height/ascale[1])
+		if data.Height > 150 then
+			Result.Size = UDim2.fromOffset(data.Width/ascale[1]/ascale[2],data.Height/ascale[1]/ascale[2])
 		end
 	else
-		Result.Size = UDim2.fromOffset(decoded.Width, decoded.Height)
+		Result.Size = UDim2.fromOffset(data.Width,data.Height)
 	end
-
-	Width.Text = "Width: " .. decoded.Width
-	Height.Text = "Height: " .. decoded.Height
-	Pixel.Text = "Pixels: " .. decoded.Width * decoded.Height
-	PlasticBlockNeed.Text = "Plastic Block Need: " .. #GenerateMeshes(decoded)
-
-	return true
+	Width.Text = "Width: " .. data.Width
+	Height.Text = "Height: " ..data.Height
+	Pixel.Text = "Pixels: ".. data.Width * data.Height
+	MyPNGdata.PNG = data
+	PlasticBlockNeed.Text = "Plastic Block Need: " .. math.round((data.Width * data.Height)*(scale/2))
+	Opition1.Text = "ImageLoaderBabft/preview.png"
+	Result.Image = getcustomasset("ImageLoaderBabft/preview.png")
 end
 
-
-if isfile("ImageLoaderBabft/preview.png") then
-	local data = readfile("ImageLoaderBabft/preview.png")
-	if UpdateImageInfo(data) then
-		Opition1.Text = "ImageLoaderBabft/preview.png"
-		Result.Image = getcustomasset("ImageLoaderBabft/preview.png")
-	end
-end
+local IconsData = {
+	["Icon"] = PNG.new(readfile("ImageLoaderBabft/icon.png")),
+	["Minimize"] = PNG.new(readfile("ImageLoaderBabft/minimize.png")),
+	["Close"] = PNG.new(readfile("ImageLoaderBabft/close.png")),
+}
 
 local previewpart
 
@@ -1163,47 +1130,47 @@ end)
 
 local old = Opition1.Text
 Opition1.FocusLost:Connect(function(enter)
-	if Opition1.Text == "" or Opition1.Text == old then
+	if Opition1.Text == "" then
 		return
 	end
-
 	if enter then
-		local imageDataString
-		local success, result = pcall(function()
-			return game:HttpGet(Opition1.Text, true)
+		local succes,reason = pcall(function()
+			game:HttpGet(Opition1.Text)
 		end)
-
-		if success and result then
-			imageDataString = result
+		if succes then
+			MyPNGdata.Data = game:HttpGet(Opition1.Text)
+		elseif isfile(Opition1.Text) and (Opition1.Text:find(".png") or Opition1.Text:find(".PNG")) then
+			MyPNGdata.Data = readfile(Opition1.Text)
 		else
-			local lowerText = Opition1.Text:lower()
-			if isfile(Opition1.Text) and (lowerText:find(".png") or lowerText:find(".jpg") or lowerText:find(".jpeg")) then
-				imageDataString = readfile(Opition1.Text)
-			else
-				warn("Lỗi khi tải ảnh hoặc đường dẫn file không hợp lệ.")
-				Opition1.Text = old
-				return
-			end
-		end
-
-		if imageDataString and imageDataString ~= "" then
-			if UpdateImageInfo(imageDataString) then
-				-- Ghi lại file preview với một tên chung, không quan trọng định dạng gốc
-				writefile("ImageLoaderBabft/preview.dat", imageDataString) 
-				-- Để hiển thị trên GUI, chúng ta cần một định dạng mà Roblox hỗ trợ.
-				-- Nếu là file cục bộ, ta có thể dùng getcustomasset. Nếu là URL, ta có thể dùng nó trực tiếp.
-				if isfile(Opition1.Text) then
-					Result.Image = getcustomasset(Opition1.Text)
-				else
-					Result.Image = Opition1.Text
-				end
-				old = Opition1.Text
-			else
-				Opition1.Text = old -- Quay lại giá trị cũ nếu giải mã thất bại
-			end
-		else
+			warn("error to trying get image.")
 			Opition1.Text = old
+			return
 		end
+		if MyPNGdata.Data ~= "" then
+			writefile("ImageLoaderBabft/preview.png",MyPNGdata.Data)
+			Result.Image = getcustomasset("ImageLoaderBabft/preview.png")
+		else
+			Result.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+		end
+		local data = PNG.new(MyPNGdata.Data)
+		local ascale = {
+			data.Width/150,
+			data.Height/150,
+		}
+		if data.Width > 150 then
+			Result.Size = UDim2.fromOffset(data.Width/ascale[1],data.Height/ascale[1])
+			if data.Height > 150 then
+				Result.Size = UDim2.fromOffset(data.Width/ascale[1]/ascale[2],data.Height/ascale[1]/ascale[2])
+			end
+		else
+			Result.Size = UDim2.fromOffset(data.Width,data.Height)
+		end
+		Width.Text = "Width: " .. data.Width
+		Height.Text = "Height: " ..data.Height
+		Pixel.Text = "Pixels: ".. data.Width * data.Height
+		MyPNGdata.PNG = data
+		PlasticBlockNeed.Text = "Plastic Block Need: " .. math.round((data.Width * data.Height)*(scale/2))
+		old = Opition1.Text
 	else
 		Opition1.Text = old
 	end
@@ -1216,6 +1183,7 @@ end)
 game:GetService("Players").LocalPlayer.Data.PlasticBlock.Used.Changed:Connect(function()
 	PlasticBlock.Text = "Plastic Block: ".. math.floor(game:GetService("Players").LocalPlayer.Data.PlasticBlock.Value - game:GetService("Players").LocalPlayer.Data.PlasticBlock.Used.Value)
 end)
+
 
 local myzone = workspace:FindFirstChild(game.Players.LocalPlayer.TeamColor.Name.."Zone")
 if not myzone then
@@ -1232,31 +1200,31 @@ Opition1_3.Text = rotate
 Opition1_4.Text = move
 
 Preview.MouseButton1Click:Connect(function()
-	if not MyImageData.Image.Width then -- Kiểm tra xem có dữ liệu ảnh hợp lệ không
+	if MyPNGdata.PNG == {} then
 		return
 	end
 	if previewpart then
 		previewpart:Destroy()
 		previewpart = nil
 	else
-		previewpart = Instance.new("Part", workspace)
-		previewpart.Size = Vector3.new(MyImageData.Image.Width * scale, MyImageData.Image.Height * scale, scale)
+		previewpart = Instance.new("Part",workspace)
+		previewpart.Size = Vector3.new(MyPNGdata.PNG.Width*scale,MyPNGdata.PNG.Height*scale,scale)
 		previewpart.CFrame = currentcframe
 		previewpart.Transparency = 1
 		previewpart.CanCollide = false
 		previewpart.Anchored = true
-		local SelectionBox = Instance.new("SelectionBox", previewpart)
+		local SelectionBox = Instance.new("SelectionBox",previewpart)
 		SelectionBox.Adornee = previewpart
-		SelectionBox.Color3 = Color3.new(1, 1, 1)
+		SelectionBox.Color3 = Color3.new(1,1,1)
 		SelectionBox.SurfaceTransparency = 0.8
-		SelectionBox.SurfaceColor3 = Color3.new(1, 1, 1)
+		SelectionBox.SurfaceColor3 = Color3.new(1,1,1)
 		SetupBuildMode(previewpart)
 	end
 end)
 Opition1_1.FocusLost:Connect(function(enter)
 	if enter then
 		if tonumber(Opition1_1.Text) then
-			scale = math.clamp(tonumber(Opition1_1.Text), 0.05, math.huge)
+			scale = math.clamp(tonumber(Opition1_1.Text),0.05,math.huge)
 			Opition1_1.Text = scale
 		else
 			Opition1_1.Text = scale
@@ -1264,9 +1232,7 @@ Opition1_1.FocusLost:Connect(function(enter)
 	else
 		Opition1_1.Text = scale
 	end
-	if MyImageData.Image.Width then
-		PlasticBlockNeed.Text = "Plastic Block Need: " .. #GenerateMeshes(MyImageData.Image)
-	end
+	PlasticBlockNeed.Text = "Plastic Block Need: " .. math.round((MyPNGdata.PNG.Width * MyPNGdata.PNG.Height)*(scale/2))
 end)
 Opition1_4.FocusLost:Connect(function(enter)
 	if enter then
@@ -1292,8 +1258,8 @@ Opition1_3.FocusLost:Connect(function(enter)
 end)
 
 local RunService = game:GetService("RunService")
--- [GIỮ NGUYÊN] Hàm buildBlock đã được tối ưu
 function buildBlock(cframe, blacklist)
+	-- Chuẩn bị các tham số để gửi đến server
 	local args = {
 		[1] = "PlasticBlock",
 		[2] = game:GetService("Players").LocalPlayer.Data.PlasticBlock.Value,
@@ -1303,44 +1269,76 @@ function buildBlock(cframe, blacklist)
 		[6] = cframe,
 		[7] = false
 	}
+
+	-- Tìm RemoteFunction một cách an toàn
 	local rfevent
 	if game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("BuildingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Character.BuildingTool.RF
 	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("BuildingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Backpack.BuildingTool.RF
 	else
+		-- Nếu không tìm thấy, cảnh báo và thoát sớm
 		warn("Không thể tìm thấy BuildingTool's RF.")
 		return nil
 	end
+
+	-- Gửi yêu cầu tới server trong một luồng mới để không chặn luồng chính
 	task.spawn(function()
 		rfevent:InvokeServer(unpack(args))
 	end)
-	local startTime = os.clock()
-	local timeout = 5
+
+	-- =================================================================
+	-- Bắt đầu vòng lặp kiểm tra để tìm block vừa được tạo
+	-- =================================================================
+
+	local startTime = os.clock() -- Ghi lại thời điểm bắt đầu để tính timeout
+	local timeout = 5 -- Thời gian chờ tối đa (giây). Tăng nếu mạng chậm.
+
+	-- Cấu hình bộ lọc cho việc quét vùng
 	local overla = OverlapParams.new()
 	overla.FilterType = Enum.RaycastFilterType.Exclude
-	overla.FilterDescendantsInstances = blacklist
-	local block
+	overla.FilterDescendantsInstances = blacklist -- Bỏ qua các block đã có trong blacklist
+
+	local block -- Biến để lưu trữ block khi tìm thấy
+
+	-- Vòng lặp sẽ chạy cho đến khi tìm thấy block HOẶC hết thời gian chờ
 	repeat
+		-- Sử dụng GetPartBoundsInBox để quét vùng xung quanh CFrame một cách hiệu quả
 		local partsInBox = workspace:GetPartBoundsInBox(cframe, Vector3.new(scale, scale, scale), overla)
+
 		for _, part in ipairs(partsInBox) do
 			local v = part.Parent
+
+			-- Kiểm tra nghiêm ngặt để đảm bảo tìm đúng block
 			if v and v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name then
+				-- So sánh vị trí bằng Magnitude để tránh lỗi dấu phẩy động (đáng tin cậy hơn so với so sánh trực tiếp)
 				if (v.PPart.Position - cframe.Position).Magnitude < 0.1 then
-					block = v
-					break
+					block = v -- Tìm thấy rồi!
+					break -- Thoát khỏi vòng lặp 'for'
 				end
 			end
 		end
+
+		-- Nếu chưa tìm thấy, đợi khung hình tiếp theo rồi mới kiểm tra lại
 		if not block then
 			RunService.Heartbeat:Wait()
 		end
-	until block or (os.clock() - startTime > timeout)
+
+	until block or (os.clock() - startTime > timeout) -- Điều kiện dừng vòng lặp
+
+	-- Nếu sau khi kết thúc vòng lặp mà vẫn không tìm thấy block, hàm sẽ trả về nil
 	return block
 end
-
 function paintblock(block,color)
-	local args = { [1] = { [1] = { [1] = block, [2] = color } } }
+	local args = {
+		[1] = {
+			[1] = {
+				[1] = block,
+				[2] = color
+			}
+		}
+	}
+
 	local rfevent
 	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("PaintingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Character.PaintingTool.RF
@@ -1351,36 +1349,49 @@ function paintblock(block,color)
 		warn("cant find rfevent.")
 		return
 	end
+
 	rfevent:InvokeServer(unpack(args))
 end
-
 function scaleBlockForMesh(block, mesh, cframe)
+	-- Tính toán kích thước mới dựa trên chiều rộng (w) và chiều cao (h) của mesh
 	local newSize = Vector3.new(mesh.w * scale, mesh.h * scale, scale)
-	local args = { [1] = block, [2] = newSize, [3] = cframe }
+
+	local args = {
+		[1] = block,
+		[2] = newSize, -- Gửi kích thước đã được tính toán
+		[3] = cframe
+	}
+
+	-- Tìm RemoteFunction để giao tiếp với server
 	local rfevent
 	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("ScalingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Character.ScalingTool.RF
 	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("ScalingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Backpack.ScalingTool.RF
 	else
+		-- ImageLoader:Destroy() -- Bạn có thể muốn xử lý lỗi này một cách nhẹ nhàng hơn
 		warn("Cannot find ScalingTool's RemoteFunction.")
 		return
 	end
+
 	rfevent:InvokeServer(unpack(args))
 end
-
 function deleteblock(block)
-	local args = { [1] = block }
+	local args = {
+		[1] = block
+	}
+
 	local rfevent
-	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("DeleteTool") then
+	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("PaintingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Character.DeleteTool.RF
-	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("DeleteTool") then
+	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("PaintingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Backpack.DeleteTool.RF
 	else
 		ImageLoader:Destroy()
 		warn("cant find rfevent.")
 		return
 	end
+
 	rfevent:InvokeServer(unpack(args))
 end
 
@@ -1388,34 +1399,44 @@ local loading = false
 local previewpixels = Instance.new("Folder",workspace)
 previewpixels.Name = "Pixels-Preview"
 
--- [ĐÃ SỬA] Hàm GenerateMeshes giờ đây sử dụng biến ImageDecoder toàn cục
-local function GenerateMeshes(decodedImage)
-	if not ImageDecoder or not decodedImage or not decodedImage.Width then
-		return {}
-	end
+-- Hàm để tối ưu hóa thuộc tính cho một loạt các Part
+local function SetProperty(propertyName, parts)
+	
+end
 
-	local width = decodedImage.Width
-	local height = decodedImage.Height
+-- Hàm Greedy Meshing để tạo các vùng hình chữ nhật từ dữ liệu ảnh
+local function GenerateMeshes(pngData)
+	local width = pngData.Width
+	local height = pngData.Height
 	local meshes = {}
+
+	-- Đọc dữ liệu pixel vào bảng để truy cập nhanh hơn
 	local pixelData = {}
 	for x = 1, width do
 		pixelData[x] = {}
 		for y = 1, height do
-			-- Sử dụng ImageDecoder đã được xác định trước đó
-			pixelData[x][y] = {ImageDecoder:GetPixel(decodedImage, x, y)}
+			pixelData[x][y] = {PNG:GetPixel(pngData, x, y)}
 		end
 	end
+
+	-- Mặt nạ theo dõi pixel đã xử lý
 	local visited = {}
 	for x = 1, width do visited[x] = {} end
+
 	for y = 1, height do
 		for x = 1, width do
 			if not visited[x][y] then
 				local color, alpha = unpack(pixelData[x][y])
+
+				-- Chỉ xử lý các pixel có thể nhìn thấy (không hoàn toàn trong suốt)
 				if alpha > 0 then
+					-- Tìm chiều rộng
 					local w = 1
 					while x + w <= width and not visited[x + w][y] and pixelData[x + w][y][1] == color and pixelData[x + w][y][2] == alpha do
 						w = w + 1
 					end
+
+					-- Tìm chiều cao
 					local h = 1
 					local canExpand = true
 					while y + h <= height and canExpand do
@@ -1427,11 +1448,15 @@ local function GenerateMeshes(decodedImage)
 						end
 						if canExpand then h = h + 1 end
 					end
+
+					-- Đánh dấu đã xử lý
 					for j = 0, h - 1 do
 						for i = 0, w - 1 do
 							visited[x + i][y + j] = true
 						end
 					end
+
+					-- Thêm mesh vào kết quả
 					table.insert(meshes, {x = x, y = y, w = w, h = h, color = color, alpha = alpha})
 				end
 			end
@@ -1439,52 +1464,64 @@ local function GenerateMeshes(decodedImage)
 	end
 	return meshes
 end
-
--- [ĐÃ SỬA] Sự kiện Load chính, giờ đây linh hoạt hơn
 Load.MouseButton1Click:Connect(function()
 	if loading then
 		loading = false
 		Title_6.Text = "Load"
 		return
 	end
-	-- Kiểm tra xem có dữ liệu ảnh hợp lệ để load không
-	if not MyImageData.Image or not MyImageData.Image.Width then
-		warn("Không có dữ liệu ảnh hợp lệ để tải.")
-		return
-	end
 
 	loading = true
 	Title_6.Text = "Generating Meshes..."
+
+	-- Dọn dẹp môi trường
 	workspace:WaitForChild("ClearAllPlayersBoatParts"):FireServer()
-	previewpixels:ClearAllChildren()
+	previewpixels:ClearAllChildren() -- Giả sử vẫn dùng để xem trước hoặc đã bị loại bỏ
 	if previewpart then
 		previewpart:Destroy()
 	end
 
 	task.spawn(function()
-		local meshes = GenerateMeshes(MyImageData.Image)
+		-- Bước 1: Tạo các mesh một lần duy nhất
+		local meshes = GenerateMeshes(MyPNGdata.PNG)
 		Title_6.Text = "Building " .. #meshes .. " parts..."
-		PlasticBlockNeed.Text = "Plastic Block Need: " .. #meshes
 
-		local sizex, sizey = MyImageData.Image.Width * scale, MyImageData.Image.Height * scale
+		local sizex, sizey = MyPNGdata.PNG.Width * scale, MyPNGdata.PNG.Height * scale
 		local startcframe = currentcframe * CFrame.new(sizex / 2, sizey / 2, 0)
+
 		local blacklists = {}
-		local partsPerFrame = 25
+		local partsPerFrame = 25 -- Số lượng mesh xử lý mỗi frame để game không bị treo
 		local partsProcessed = 0
 
+		-- Bước 2: Lặp qua các MESH đã được tối ưu hóa, không phải từng pixel
 		for _, mesh in ipairs(meshes) do
 			if not loading then break end
-			local centerPosition = Vector3.new((mesh.x + mesh.w / 2 - 1) * scale, (mesh.y + mesh.h / 2 - 1) * scale, 0)
+
+			-- Tính toán vị trí TRUNG TÂM của mesh để đặt CFrame cho chính xác
+			local centerPosition = Vector3.new(
+				(mesh.x + mesh.w / 2 - 1) * scale,
+				(mesh.y + mesh.h / 2 - 1) * scale,
+				0
+			)
 			local meshCFrame = startcframe * CFrame.new(centerPosition):Inverse()
+
+			-- Gọi các hàm server cho MỘT LẦN cho cả một vùng lớn
 			local block = buildBlock(meshCFrame, blacklists)
 			if block then
 				table.insert(blacklists, block)
+
 				paintblock(block, mesh.color)
+
+				-- Sử dụng hàm scale mới để thay đổi kích thước theo mesh
 				scaleBlockForMesh(block, mesh, meshCFrame)
+
+				-- Gắn tag để nhận biết
 				local tag = Instance.new("ObjectValue", block)
 				tag.Name = "IsAPixel"
 				tag.Value = game.Players.LocalPlayer
 			end
+
+			-- Xử lý theo đợt để không làm client quá tải
 			partsProcessed = partsProcessed + 1
 			if partsProcessed >= partsPerFrame then
 				task.wait()
@@ -1492,21 +1529,27 @@ Load.MouseButton1Click:Connect(function()
 			end
 		end
 
+		-- Bước 3: Dọn dẹp và hoàn tất
 		if loading then
 			Title_6.Text = "Cleaning up..."
-			task.wait(2)
+			task.wait(2) -- Đợi một chút để các lệnh server cuối cùng hoàn tất
+
+			-- Dọn dẹp các part không thuộc về hình ảnh
 			for _, v in ipairs(workspace:GetChildren()) do
 				if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and not v:FindFirstChild("IsAPixel") then
 					spawn(function() deleteblock(v) end)
 				end
 			end
+			-- Dọn dẹp tag
 			for _, v in ipairs(workspace:GetChildren()) do
 				if v:FindFirstChild("IsAPixel") then
 					v.IsAPixel:Destroy()
 				end
 			end
+
 			Title_6.Text = "Load Complete"
 		end
+
 		loading = false
 		task.wait(1)
 		Title_6.Text = "Load"
@@ -1515,21 +1558,18 @@ end)
 
 local connect
 connect = game:GetService("RunService").Heartbeat:Connect(function()
-	if not ImageLoader or ImageLoader.Parent == nil then
+	if not ImageLoader or ImageLoader == nil then
 		connect:Disconnect()
 		return
 	end
-	if previewpart and previewpart.Parent then
-		if MyImageData.Image.Width then
-			previewpart.Size = Vector3.new(MyImageData.Image.Width * scale, MyImageData.Image.Height * scale, scale)
-		end
+	if previewpart then
+		previewpart.Size = Vector3.new(MyPNGdata.PNG.Width*scale,MyPNGdata.PNG.Height*scale,scale)
 		currentcframe = previewpart.CFrame
 		TitlePos.Text = "Position: ".. math.round(previewpart.Position.X)..","..math.round(previewpart.Position.Y)..","..math.round(previewpart.Position.Z)
-		TitleOrientation.Text = "Orientation: ".. math.round(previewpart.Orientation.X)..","..math.round(previewpart.Orientation.Y)..","..math.round(previewpart.Orientation.Z)
+		TitleOrientation.Text = "Orientation".. math.round(previewpart.Orientation.X)..","..math.round(previewpart.Orientation.Y)..","..math.round(previewpart.Orientation.Z)
 	end
-	Main.CanvasSize = UDim2.fromOffset(0, UIListLayout_3.AbsoluteContentSize.Y)
+	Main.CanvasSize = UDim2.fromOffset(0,UIListLayout_3.AbsoluteContentSize.Y)
 end)
-
 ImageLoader.Destroying:Connect(function()
 	if previewpart then
 		previewpart:Destroy()
@@ -1537,9 +1577,7 @@ ImageLoader.Destroying:Connect(function()
 	if previewpixels then
 		previewpixels:Destroy()
 	end
-	if connect and connect.Connected then
-		connect:Disconnect()
-	end
+	connect:Disconnect()
 end)
 
 Ratio.Visible = false
