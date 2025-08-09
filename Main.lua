@@ -1,4 +1,5 @@
 -- Objects To Lua Make By HairBaconGamming --
+print("Running Script...")
 local Module_Scripts = {}
 local ImageLoader = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
@@ -760,6 +761,7 @@ if Gui:FindFirstChild("ImageLoader") then
 end
 
 ImageLoader.Parent = Gui
+print("Created UI!",Gui)
 
 local scale = 1
 local ratio = {1,1}
