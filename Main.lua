@@ -1349,29 +1349,38 @@ function paintblock(block,color)
 
 	rfevent:InvokeServer(unpack(args))
 end
-function scaleBlockForMesh(block, mesh, cframe)
-	-- Tính toán kích thước mới dựa trên chiều rộng (w) và chiều cao (h) của mesh
-	local newSize = Vector3.new(mesh.w * scale, mesh.h * scale, scale)
-
+function scaleblock(block,cframe)
 	local args = {
 		[1] = block,
-		[2] = newSize, -- Gửi kích thước đã được tính toán
+		[2] = Vector3.new(scale,scale,scale),
 		[3] = cframe
 	}
-
-	-- Tìm RemoteFunction để giao tiếp với server
 	local rfevent
 	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("ScalingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Character.ScalingTool.RF
 	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("ScalingTool") then
 		rfevent = game:GetService("Players").LocalPlayer.Backpack.ScalingTool.RF
 	else
-		-- ImageLoader:Destroy() -- Bạn có thể muốn xử lý lỗi này một cách nhẹ nhàng hơn
-		warn("Cannot find ScalingTool's RemoteFunction.")
+		ImageLoader:Destroy()
+		warn("cant find rfevent.")
 		return
 	end
 
 	rfevent:InvokeServer(unpack(args))
+
+	--[[
+	local scaledblock
+	local antilag = 0
+	repeat game:GetService("RunService").Heartbeat:Wait()
+		for i,v in pairs(workspace:GetChildren()) do
+			if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and v:FindFirstChild("PPart") and v.PPart.CFrame == cframe and v.PPart.Size == Vector3.new(scale,scale,scale) then
+				scaledblock = v
+				break
+			end
+		end
+	until scaledblock
+	return scaledblock
+	]]
 end
 function deleteblock(block)
 	local args = {
@@ -1396,161 +1405,150 @@ local loading = false
 local previewpixels = Instance.new("Folder",workspace)
 previewpixels.Name = "Pixels-Preview"
 
--- Hàm để tối ưu hóa thuộc tính cho một loạt các Part
-local function SetProperty(propertyName, parts)
-	
-end
 
--- Hàm Greedy Meshing để tạo các vùng hình chữ nhật từ dữ liệu ảnh
-local function GenerateMeshes(pngData)
-	local width = pngData.Width
-	local height = pngData.Height
-	local meshes = {}
-
-	-- Đọc dữ liệu pixel vào bảng để truy cập nhanh hơn
-	local pixelData = {}
-	for x = 1, width do
-		pixelData[x] = {}
-		for y = 1, height do
-			pixelData[x][y] = {PNG:GetPixel(pngData, x, y)}
+Load.MouseButton1Click:Connect(function()
+	if loading == false then
+		loading = true
+		local sizex,sizey = MyPNGdata.PNG.Width*scale,MyPNGdata.PNG.Height*scale
+		local startcframe = currentcframe * CFrame.new(sizex/2,sizey/2,0)
+		if previewpart then
+			previewpart:Destroy()
 		end
-	end
-
-	-- Mặt nạ theo dõi pixel đã xử lý
-	local visited = {}
-	for x = 1, width do visited[x] = {} end
-
-	for y = 1, height do
-		for x = 1, width do
-			if not visited[x][y] then
-				local color, alpha = unpack(pixelData[x][y])
-
-				-- Chỉ xử lý các pixel có thể nhìn thấy (không hoàn toàn trong suốt)
-				if alpha > 0 then
-					-- Tìm chiều rộng
-					local w = 1
-					while x + w <= width and not visited[x + w][y] and pixelData[x + w][y][1] == color and pixelData[x + w][y][2] == alpha do
-						w = w + 1
-					end
-
-					-- Tìm chiều cao
-					local h = 1
-					local canExpand = true
-					while y + h <= height and canExpand do
-						for k = 0, w - 1 do
-							if visited[x + k][y + h] or pixelData[x + k][y + h][1] ~= color or pixelData[x + k][y + h][2] ~= alpha then
-								canExpand = false
-								break
-							end
-						end
-						if canExpand then h = h + 1 end
-					end
-
-					-- Đánh dấu đã xử lý
-					for j = 0, h - 1 do
-						for i = 0, w - 1 do
-							visited[x + i][y + j] = true
-						end
-					end
-
-					-- Thêm mesh vào kết quả
-					table.insert(meshes, {x = x, y = y, w = w, h = h, color = color, alpha = alpha})
+		--[[
+		local antilag = 0
+		for x = 1,MyPNGdata.PNG.Width do
+			for y = 1,MyPNGdata.PNG.Height do
+				antilag += 1
+				if antilag >= 1000 then
+					antilag = 0
+					game:GetService("RunService").Heartbeat:Wait()
 				end
+				local color,alpha = PNG:GetPixel(MyPNGdata.PNG,x,y)
+				local temple = game:GetService("ReplicatedStorage").BuildingParts.PlasticBlock.PPart:Clone()
+				temple.Parent = previewpixels
+				temple.Transparency = 0.9
+				temple.Size = Vector3.new(scale,scale,scale)
+				temple.CFrame = startcframe * CFrame.new(x*scale,y*scale,0):Inverse()
+				temple.Anchored = true
+				temple.CanCollide = false
+				temple.Color = color
 			end
 		end
-	end
-	return meshes
-end
-Load.MouseButton1Click:Connect(function()
-	if loading then
-		loading = false
-		Title_6.Text = "Load"
-		return
-	end
-
-	loading = true
-	Title_6.Text = "Generating Meshes..."
-
-	-- Dọn dẹp môi trường
-	workspace:WaitForChild("ClearAllPlayersBoatParts"):FireServer()
-	previewpixels:ClearAllChildren() -- Giả sử vẫn dùng để xem trước hoặc đã bị loại bỏ
-	if previewpart then
-		previewpart:Destroy()
-	end
-
-	task.spawn(function()
-		-- Bước 1: Tạo các mesh một lần duy nhất
-		local meshes = GenerateMeshes(MyPNGdata.PNG)
-		Title_6.Text = "Building " .. #meshes .. " parts..."
-
-		local sizex, sizey = MyPNGdata.PNG.Width * scale, MyPNGdata.PNG.Height * scale
-		local startcframe = currentcframe * CFrame.new(sizex / 2, sizey / 2, 0)
+		]]
+		workspace:WaitForChild("ClearAllPlayersBoatParts"):FireServer()
+		Title_6.Text = "End load"
 
 		local blacklists = {}
-		local partsPerFrame = 25 -- Số lượng mesh xử lý mỗi frame để game không bị treo
-		local partsProcessed = 0
-
-		-- Bước 2: Lặp qua các MESH đã được tối ưu hóa, không phải từng pixel
-		for _, mesh in ipairs(meshes) do
-			if not loading then break end
-
-			-- Tính toán vị trí TRUNG TÂM của mesh để đặt CFrame cho chính xác
-			local centerPosition = Vector3.new(
-				(mesh.x + mesh.w / 2 - 1) * scale,
-				(mesh.y + mesh.h / 2 - 1) * scale,
-				0
-			)
-			local meshCFrame = startcframe * CFrame.new(centerPosition):Inverse()
-
-			-- Gọi các hàm server cho MỘT LẦN cho cả một vùng lớn
-			local block = buildBlock(meshCFrame, blacklists)
-			if block then
-				table.insert(blacklists, block)
-
-				paintblock(block, mesh.color)
-
-				-- Sử dụng hàm scale mới để thay đổi kích thước theo mesh
-				scaleBlockForMesh(block, mesh, meshCFrame)
-
-				-- Gắn tag để nhận biết
-				local tag = Instance.new("ObjectValue", block)
+		local antilag = 0
+		local intask = 0
+		for x = 1,MyPNGdata.PNG.Width,1 do
+			antilag +=1
+			if loading == false then
+				break
+			end
+			local function a()
+				for y = 1,MyPNGdata.PNG.Height,1 do
+					if loading == false then
+						break
+					end
+					local color,alpha = PNG:GetPixel(MyPNGdata.PNG,x,y)
+					local cframe = startcframe * CFrame.new(x*scale,y*scale,0):Inverse()
+					local block = buildBlock(cframe,blacklists)
+					table.insert(blacklists,block)
+					local tag = Instance.new("ObjectValue",block)
+					tag.Name = "IsAPixel"
+					tag.Value = game.Players.LocalPlayer
+					task.spawn(function()
+						spawn(function()
+							paintblock(block,color)
+						end)
+						local e = scaleblock(block,cframe)
+					end)
+				end
+			end
+			if antilag >= 100 then
+				antilag = 0
+				intask+=1
+				a()
+				intask-=1
+			else
+				task.spawn(function()
+					intask+=1
+					a()
+					intask-=1
+				end)
+			end
+		end
+		repeat task.wait() until intask<=0 or loading==false
+		--[[
+			local oldtick = tick()
+		local antilag = 0
+		local x,y = 0,0
+		local blacklists = {}
+		local i = 0
+		local blocks = {}
+		local process = 0
+		local id = 0
+		while true do
+			antilag += 1
+			i += 1
+			id += 1
+			if loading == false then
+				break
+			end
+			if antilag >= 10 then
+				antilag = 0
+				game:GetService("RunService").Heartbeat:Wait()
+			end
+			local color,alpha = PNG:GetPixel(MyPNGdata.PNG,x,y)
+			local cframe = startcframe * CFrame.new(x*scale,y*scale,0):Inverse()
+			if tick()-oldtick >= 1 then
+				oldtick = tick()
+				print(math.floor((id) / (MyPNGdata.PNG.Width * MyPNGdata.PNG.Height) * 10000)/10000 * 100 .."% | ".. id .. "/".. MyPNGdata.PNG.Width * MyPNGdata.PNG.Height)
+			end
+			spawn(function()
+				process += 1
+				local v = buildBlock(cframe,blacklists)
+				table.insert(blocks,{x=x,y=y,block=v,color=color,cframe=cframe})
+				table.insert(blacklists,v)
+				spawn(function()
+					paintblock(v,color)
+				end)
+				local e = scaleblock(v,cframe)
+				local tag = Instance.new("ObjectValue",v)
 				tag.Name = "IsAPixel"
 				tag.Value = game.Players.LocalPlayer
+				process -= 1
+			end)
+			y += 1
+			if y > MyPNGdata.PNG.Height then
+				y = 0
+				x += 1
 			end
-
-			-- Xử lý theo đợt để không làm client quá tải
-			partsProcessed = partsProcessed + 1
-			if partsProcessed >= partsPerFrame then
-				task.wait()
-				partsProcessed = 0
+			if x > MyPNGdata.PNG.Width then
+				break
 			end
 		end
-
-		-- Bước 3: Dọn dẹp và hoàn tất
-		if loading then
-			Title_6.Text = "Cleaning up..."
-			task.wait(2) -- Đợi một chút để các lệnh server cuối cùng hoàn tất
-
-			-- Dọn dẹp các part không thuộc về hình ảnh
-			for _, v in ipairs(workspace:GetChildren()) do
-				if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and not v:FindFirstChild("IsAPixel") then
-					spawn(function() deleteblock(v) end)
-				end
+		]]
+		for i,v in pairs(workspace:GetChildren()) do
+			if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and not v:FindFirstChild("IsAPixel") then
+				spawn(function()
+					deleteblock(v)
+				end)
 			end
-			-- Dọn dẹp tag
-			for _, v in ipairs(workspace:GetChildren()) do
-				if v:FindFirstChild("IsAPixel") then
-					v.IsAPixel:Destroy()
-				end
-			end
-
-			Title_6.Text = "Load Complete"
 		end
-
+		for i,v in pairs(workspace:GetChildren()) do
+			if v:FindFirstChild("IsAPixel") then
+				v.IsAPixel:Destroy()
+			end
+		end
+		previewpixels:ClearAllChildren()
 		loading = false
-		task.wait(1)
 		Title_6.Text = "Load"
-	end)
+	else
+		loading = false
+		Title_6.Text = "Load"
+	end
 end)
 
 local connect
