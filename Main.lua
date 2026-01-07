@@ -1070,15 +1070,21 @@ UIScale.Parent = ImageLoader
 
 if not isfolder("ImageLoaderBabft") then
 	makefolder("ImageLoaderBabft")
-	if not isfile("ImageLoaderBabft/icon.png") then
-		writefile("ImageLoaderBabft/icon.png",game:HttpGet("https://cdn.glitch.global/a6e9b220-077c-45df-9f91-f60d0cc1ab2c/download-removebg-preview.png?v=1696137809283"))
+	
+	local function safeDownload(path, url)
+		if not isfile(path) then
+			local success, response = pcall(function()
+				return game:HttpGet(url)
+			end)
+			if success and response and type(response) == "string" then
+				writefile(path, response)
+			end
+		end
 	end
-	if not isfile("ImageLoaderBabft/minimize.png") then
-		writefile("ImageLoaderBabft/minimize.png",game:HttpGet("https://cdn.glitch.global/a6e9b220-077c-45df-9f91-f60d0cc1ab2c/image.png?v=1696138130089"))
-	end
-	if not isfile("ImageLoaderBabft/close.png") then
-		writefile("ImageLoaderBabft/close.png",game:HttpGet("https://cdn.glitch.global/a6e9b220-077c-45df-9f91-f60d0cc1ab2c/image.png?v=1696138242896"))
-	end
+
+	safeDownload("ImageLoaderBabft/icon.png", "https://i.ibb.co/rRbszL38/Gemini-Generated-Image-ijup61ijup61ijup-removebg-preview.png")
+	safeDownload("ImageLoaderBabft/minimize.png", "https://www.svgrepo.com/show/506630/window-minimize.svg")
+	safeDownload("ImageLoaderBabft/close.png", "https://www.svgrepo.com/show/499592/close-x.svg")
 end
 
 Icon.Image = getcustomasset("ImageLoaderBabft/icon.png")
