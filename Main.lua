@@ -1078,6 +1078,8 @@ if not isfolder("ImageLoaderBabft") then
 			end)
 			if success and response and type(response) == "string" then
 				writefile(path, response)
+			else
+				writefile(path, "nothing")
 			end
 		end
 	end
