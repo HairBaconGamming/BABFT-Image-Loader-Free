@@ -1070,24 +1070,25 @@ UIScale.Parent = ImageLoader
 
 if not isfolder("ImageLoaderBabft") then
 	makefolder("ImageLoaderBabft")
-	
-	local function safeDownload(path, url)
-		if not isfile(path) then
-			local success, response = pcall(function()
-				return game:HttpGet(url)
-			end)
-			if success and response and type(response) == "string" then
-				writefile(path, response)
-			else
-				writefile(path, "nothing")
-			end
-		end
-	end
-
-	safeDownload("ImageLoaderBabft/icon.png", "https://i.ibb.co/rRbszL38/Gemini-Generated-Image-ijup61ijup61ijup-removebg-preview.png")
-	safeDownload("ImageLoaderBabft/minimize.png", "https://www.svgrepo.com/show/506630/window-minimize.svg")
-	safeDownload("ImageLoaderBabft/close.png", "https://www.svgrepo.com/show/499592/close-x.svg")
 end
+local function safeDownload(path, url)
+    if not isfile(path) then
+        local success, response = pcall(function()
+            return game:HttpGet(url)
+        end)
+        if success and response and type(response) == "string" then
+            writefile(path, response)
+        else
+            print(respone)
+            writefile(path, "nothing")
+        end
+    end
+end
+
+safeDownload("ImageLoaderBabft/icon.png", "https://i.ibb.co/rRbszL38/Gemini-Generated-Image-ijup61ijup61ijup-removebg-preview.png")
+safeDownload("ImageLoaderBabft/minimize.png", "https://cpng.pikpng.com/pngl/s/140-1407361_minimize-icon-png-minimize-button-icon-png-clipart.png")
+safeDownload("ImageLoaderBabft/close.png", "https://images.icon-icons.com/822/PNG/512/close_icon-icons.com_66473.png")
+
 
 Icon.Image = getcustomasset("ImageLoaderBabft/icon.png")
 Minimize.Image = getcustomasset("ImageLoaderBabft/minimize.png")
@@ -1123,12 +1124,6 @@ if isfile("ImageLoaderBabft/preview.png") then
 	Opition1.Text = "ImageLoaderBabft/preview.png"
 	Result.Image = getcustomasset("ImageLoaderBabft/preview.png")
 end
-
-local IconsData = {
-	["Icon"] = PNG.new(readfile("ImageLoaderBabft/icon.png")),
-	["Minimize"] = PNG.new(readfile("ImageLoaderBabft/minimize.png")),
-	["Close"] = PNG.new(readfile("ImageLoaderBabft/close.png")),
-}
 
 local previewpart
 
@@ -1266,73 +1261,99 @@ Opition1_3.FocusLost:Connect(function(enter)
 end)
 
 local RunService = game:GetService("RunService")
-function buildBlock(cframe,blacklist)
-	local args = {
-		[1] = "PlasticBlock",
-		[2] = game:GetService("Players").LocalPlayer.Data.PlasticBlock.Value,
-		[3] = myzone,
-		[4] = CFrame.new(cframe.Position-myzone.Position),
-		[5] = true,
-		[6] = cframe,
-		[7] = false
-	}
-	-- cframe*myzone.CFrame:Inverse()
-	local rfevent
-	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("BuildingTool") then
-		rfevent = game:GetService("Players").LocalPlayer.Character.BuildingTool.RF
-	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("BuildingTool") then
-		rfevent = game:GetService("Players").LocalPlayer.Backpack.BuildingTool.RF
-	else
-		ImageLoader:Destroy()
-		warn("cant find rfevent.")
-		return
-	end
+function buildBlock(cframe, blacklist)
+    local targetPos = cframe.Position
+    local Player = game:GetService("Players").LocalPlayer
+    local BlockFolder = workspace.Blocks:FindFirstChild(Player.Name)
+    
+    -- Argument cho RemoteEvent
+    local args = {
+        [1] = "PlasticBlock",
+        [2] = Player.Data.PlasticBlock.Value,
+        [3] = myzone,
+        [4] = CFrame.new(targetPos - myzone.Position),
+        [5] = true,
+        [6] = cframe,
+        [7] = false
+    }
 
-	local block
-	local connect
-	local a = Instance.new("BindableEvent")
-	connect = workspace.Blocks[game.Players.LocalPlayer.Name].ChildAdded:Connect(function(v)
-		if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and v.PPart.Position == cframe.Position then
-			block=v
-			a:Fire()
-			connect:Disconnect()
-		end
-	end)
+    -- Tìm RemoteFunction chính xác
+    local rfevent
+    local charTool = Player.Character:FindFirstChild("BuildingTool")
+    local backpackTool = Player.Backpack:FindFirstChild("BuildingTool")
+    
+    if charTool then
+        rfevent = charTool.RF
+    elseif backpackTool then
+        rfevent = backpackTool.RF
+    else
+        -- ImageLoader:Destroy() -- Tùy chọn: Không nên destroy UI chỉ vì lỗi này, chỉ cần warn
+        warn("Không tìm thấy BuildingTool RF.")
+        return nil
+    end
 
-	local succes = false
-	delay(1,function()
-		if not succes then
-			local overla = OverlapParams.new()
-			overla.FilterType=Enum.RaycastFilterType.Exclude
-			overla.FilterDescendantsInstances=blacklist
-			local parts = workspace:GetPartBoundsInBox(cframe,Vector3.new(scale,scale,scale),overla)
-			for i,e in pairs(parts) do
-				local v = e.Parent
-				if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and e.Position == cframe.Position then
-					block=v
-					a:Fire()
-					connect:Disconnect()
-					return block
-				end
-			end
-			-- look fail let do again
-			connect:Disconnect()
-			block = buildBlock(cframe,blacklist)
-			a:Fire()
-		end
-	end)
-	ImageLoader.Destroying:Connect(function()
-		if not succes then
-			-- oh no
-			a:Fire()
-		end
-	end)
-	task.spawn(function()
-		rfevent:InvokeServer(unpack(args))
-	end)
-	a.Event:Wait()
-	succes = true
-	return block
+    local foundBlock = nil
+    
+    -- Hàm kiểm tra xem block có phải cái ta cần tìm không (Dùng Magnitude để tránh lỗi sai số vị trí)
+    local function isTargetBlock(block)
+        if block.Name == "PlasticBlock" 
+        and block:FindFirstChild("Tag") 
+        and block.Tag.Value == Player.Name 
+        and block:FindFirstChild("PPart") then
+            -- Cho phép sai số khoảng cách nhỏ hơn 0.1 stud (quan trọng)
+            if (block.PPart.Position - targetPos).Magnitude < 0.1 then
+                return true
+            end
+        end
+        return false
+    end
+
+    -- 1. LẮNG NGHE TRƯỚC: Tạo connection lắng nghe ChildAdded ngay trước khi bắn remote
+    -- Điều này đảm bảo bắt được block kể cả khi server phản hồi cực nhanh
+    local connection
+    if BlockFolder then
+        connection = BlockFolder.ChildAdded:Connect(function(child)
+            if isTargetBlock(child) then
+                foundBlock = child
+            end
+        end)
+    end
+
+    -- 2. BẮN TÍN HIỆU: Invoke Server (Sử dụng task.spawn để không chặn luồng client)
+    task.spawn(function()
+        rfevent:InvokeServer(unpack(args))
+    end)
+
+    -- 3. VÒNG LẶP KIỂM TRA (Polling): Chờ block xuất hiện
+    local timeout = 2 -- Thời gian chờ tối đa (giây)
+    local startTick = tick()
+    
+    -- Sử dụng OverlapParams cho việc quét vùng (nhanh hơn quét toàn bộ workspace)
+    local overlapParams = OverlapParams.new()
+    overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+    overlapParams.FilterDescendantsInstances = blacklist or {}
+    
+    while not foundBlock and (tick() - startTick < timeout) do
+        -- Nếu ChildAdded chưa bắt được, ta chủ động quét vùng không gian đó
+        -- Kích thước box quét nhỏ (1x1x1) là đủ
+        local parts = workspace:GetPartBoundsInBox(cframe, Vector3.new(1, 1, 1), overlapParams)
+        
+        for _, part in ipairs(parts) do
+            local model = part.Parent
+            if model and isTargetBlock(model) then
+                foundBlock = model
+                break
+            end
+        end
+        
+        if foundBlock then break end
+        game:GetService("RunService").Heartbeat:Wait() -- Chờ frame tiếp theo
+    end
+
+    -- Dọn dẹp connection
+    if connection then connection:Disconnect() end
+
+    return foundBlock
 end
 function paintblock(block,color)
 	local args = {
