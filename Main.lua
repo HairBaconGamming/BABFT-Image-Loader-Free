@@ -1,1414 +1,1166 @@
--- Objects To Lua Make By HairBaconGamming --
--- OPTIMIZED VERSION BY GEMINI (FASTEST & SAFE) --
-
-local Module_Scripts = {}
-local ImageLoader = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local TopBar = Instance.new("Frame")
-local _Title = Instance.new("Frame")
-local UIListLayout = Instance.new("UIListLayout")
-local Icon = Instance.new("ImageLabel")
-local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
-local Title = Instance.new("TextLabel")
-local UIListLayout_1 = Instance.new("UIListLayout")
-local Buttons = Instance.new("Frame")
-local UIListLayout_2 = Instance.new("UIListLayout")
-local Close = Instance.new("ImageButton")
-local UIAspectRatioConstraint_1 = Instance.new("UIAspectRatioConstraint")
-local Minimize = Instance.new("ImageButton")
-local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
-local Smooth_GUI_Dragging = Instance.new("LocalScript")
-local Main = Instance.new("ScrollingFrame")
-local UIListLayout_3 = Instance.new("UIListLayout")
-local _Configuration = Instance.new("TextLabel")
-local Result = Instance.new("ImageLabel")
-local ImageInfo = Instance.new("Frame")
-local Frame_1 = Instance.new("Frame")
-local Title_1 = Instance.new("TextLabel")
-local Opition1 = Instance.new("TextBox")
-local Width = Instance.new("TextLabel")
-local Height = Instance.new("TextLabel")
-local Pixel = Instance.new("TextLabel")
-local Loader = Instance.new("TextLabel")
-local PlasticBlock = Instance.new("TextLabel")
-local Configuration = Instance.new("Frame")
-local Scale = Instance.new("Frame")
-local Title_2 = Instance.new("TextLabel")
-local Opition1_1 = Instance.new("TextBox")
-local UIListLayout_4 = Instance.new("UIListLayout")
-local Ratio = Instance.new("Frame")
-local Title_3 = Instance.new("TextLabel")
-local Opition1_2 = Instance.new("TextBox")
-local Rotate = Instance.new("Frame")
-local Title_4 = Instance.new("TextLabel")
-local Opition1_3 = Instance.new("TextBox")
-local Move = Instance.new("Frame")
-local Title_5 = Instance.new("TextLabel")
-local Opition1_4 = Instance.new("TextBox")
-local Configuration2 = Instance.new("Frame")
-local UIListLayout_5 = Instance.new("UIListLayout")
-local Load = Instance.new("TextButton")
-local Title_6 = Instance.new("TextLabel")
-local ImageLabel = Instance.new("ImageLabel")
-local UIAspectRatioConstraint_3 = Instance.new("UIAspectRatioConstraint")
-local Preview = Instance.new("TextButton")
-local Title_7 = Instance.new("TextLabel")
-local ImageLabel_1 = Instance.new("ImageLabel")
-local UIAspectRatioConstraint_4 = Instance.new("UIAspectRatioConstraint")
-local LocationInfo = Instance.new("Frame")
-local UIListLayout_6 = Instance.new("UIListLayout")
-local Position = Instance.new("Frame")
-local TitlePos = Instance.new("TextLabel")
-local Orientation = Instance.new("Frame")
-local TitleOrientation = Instance.new("TextLabel")
-local PlasticBlockNeed = Instance.new("TextLabel")
-local UIScale = Instance.new("UIScale")
-
--- Properties --
-
-ImageLoader.IgnoreGuiInset = true
-ImageLoader.Name = [[ImageLoader]]
-ImageLoader.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-Frame.BackgroundColor3 = Color3.new(0.168627, 0.168627, 0.168627)
-Frame.BorderColor3 = Color3.new(0, 0, 0)
-Frame.BorderSizePixel = 0
-Frame.Parent = ImageLoader
-Frame.Position = UDim2.new(0.0742390528, 0, 0.0364683308, 0)
-Frame.Size = UDim2.new(0, 334, 0, 457)
-
-TopBar.BackgroundColor3 = Color3.new(0.219608, 0.219608, 0.219608)
-TopBar.BorderColor3 = Color3.new(0, 0, 0)
-TopBar.BorderSizePixel = 0
-TopBar.Name = [[TopBar]]
-TopBar.Parent = Frame
-TopBar.Size = UDim2.new(1, 0, 0.0473212153, 0)
-
-_Title.BackgroundColor3 = Color3.new(1, 1, 1)
-_Title.BackgroundTransparency = 1
-_Title.BorderColor3 = Color3.new(0, 0, 0)
-_Title.BorderSizePixel = 0
-_Title.Name = [[_Title]]
-_Title.Parent = TopBar
-_Title.Size = UDim2.new(0.766055048, 0, 1, 0)
-
-UIListLayout.FillDirection = Enum.FillDirection.Horizontal
-UIListLayout.Padding = UDim.new(0, 10)
-UIListLayout.Parent = _Title
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-
-Icon.BackgroundColor3 = Color3.new(1, 1, 1)
-Icon.BackgroundTransparency = 1
-Icon.BorderColor3 = Color3.new(0, 0, 0)
-Icon.BorderSizePixel = 0
-Icon.Image = [[rbxasset://textures/ui/GuiImagePlaceholder.png]]
-Icon.Name = [[Icon]]
-Icon.Parent = _Title
-Icon.Size = UDim2.new(1, 0, 1, 0)
-
-UIAspectRatioConstraint.Parent = Icon
-
-Title.BackgroundColor3 = Color3.new(1, 1, 1)
-Title.BackgroundTransparency = 1
-Title.BorderColor3 = Color3.new(0, 0, 0)
-Title.BorderSizePixel = 0
-Title.Font = Enum.Font.SourceSans
-Title.Name = [[Title]]
-Title.Parent = _Title
-Title.Position = UDim2.new(0.169461101, 0, 0.128755346, 0)
-Title.Size = UDim2.new(0.830538988, 0, 0.704431415, 0)
-Title.Text = [[Image Loader BABFT]]
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.TextScaled = true
-Title.TextSize = 14
-Title.TextWrapped = true
-Title.TextXAlignment = Enum.TextXAlignment.Left
-
-UIListLayout_1.FillDirection = Enum.FillDirection.Horizontal
-UIListLayout_1.Padding = UDim.new(0, 5)
-UIListLayout_1.Parent = TopBar
-UIListLayout_1.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout_1.VerticalAlignment = Enum.VerticalAlignment.Center
-
-Buttons.BackgroundColor3 = Color3.new(1, 1, 1)
-Buttons.BackgroundTransparency = 1
-Buttons.BorderColor3 = Color3.new(0, 0, 0)
-Buttons.BorderSizePixel = 0
-Buttons.Name = [[Buttons]]
-Buttons.Parent = TopBar
-Buttons.Position = UDim2.new(0.781025052, 0, 0, 0)
-Buttons.Size = UDim2.new(0.218974948, 0, 0.99999994, 0)
-
-UIListLayout_2.FillDirection = Enum.FillDirection.Horizontal
-UIListLayout_2.Padding = UDim.new(0, 20)
-UIListLayout_2.Parent = Buttons
-UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout_2.VerticalAlignment = Enum.VerticalAlignment.Center
-UIListLayout_2.HorizontalAlignment = Enum.HorizontalAlignment.Right
-
-Close.Active = false
-Close.BackgroundColor3 = Color3.new(1, 1, 1)
-Close.BackgroundTransparency = 1
-Close.BorderColor3 = Color3.new(0, 0, 0)
-Close.BorderSizePixel = 0
-Close.Image = [[rbxasset://textures/ui/GuiImagePlaceholder.png]]
-Close.Name = [[Close]]
-Close.Parent = Buttons
-Close.Selectable = false
-Close.Size = UDim2.new(1, 0, 1, 0)
-
-UIAspectRatioConstraint_1.Parent = Close
-
-Minimize.Active = false
-Minimize.BackgroundColor3 = Color3.new(1, 1, 1)
-Minimize.BackgroundTransparency = 1
-Minimize.BorderColor3 = Color3.new(0, 0, 0)
-Minimize.BorderSizePixel = 0
-Minimize.Image = [[rbxasset://textures/ui/GuiImagePlaceholder.png]]
-Minimize.Name = [[Minimize]]
-Minimize.Parent = Buttons
-Minimize.Selectable = false
-Minimize.Size = UDim2.new(1, 0, 1, 0)
-
-UIAspectRatioConstraint_2.Parent = Minimize
-
-function Smooth_GUI_Dragging_ScriptfakeXD()
-
-	local script = Instance.new("LocalScript",Frame)
-	Smooth_GUI_Dragging = script
-	script.Name = [[Smooth GUI Dragging]]   
-	local require_fake = require
-	local require = function(Object)
-		local functiom = Module_Scripts[Object]
-		if functiom then
-			return functiom()
-		end
-		return require_fake(Object)
-	end
-
-	local UserInputService = game:GetService("UserInputService")
-
-	local gui = script.Parent
-
-	local dragging
-	local dragInput
-	local dragStart
-	local startPos
-
-	local function update(input)
-		local delta = input.Position - dragStart
-		game:GetService("TweenService"):Create(gui,TweenInfo.new(0.05,Enum.EasingStyle.Linear,Enum.EasingDirection.InOut),{
-			Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-		}):Play()
-	end
-
-	gui.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = gui.Position
-
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
-		end
-	end)
-
-	gui.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			update(input)
-		end
-	end)
-
-end
-coroutine.wrap(Smooth_GUI_Dragging_ScriptfakeXD)()
-
-
-Main.BackgroundColor3 = Color3.new(1, 1, 1)
-Main.BackgroundTransparency = 1
-Main.BorderColor3 = Color3.new(0, 0, 0)
-Main.BorderSizePixel = 0
-Main.CanvasSize = UDim2.new(0, 0, 0, 0)
-Main.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-Main.Name = [[Main]]
-Main.Parent = Frame
-Main.Position = UDim2.new(-0.00299401209, 0, 0.0473212115, 0)
-Main.ScrollBarThickness = 5
-Main.Selectable = false
-Main.Size = UDim2.new(0, 335, 0, 435)
-Main.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-
-UIListLayout_3.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout_3.Padding = UDim.new(0, 5)
-UIListLayout_3.Parent = Main
-UIListLayout_3.SortOrder = Enum.SortOrder.LayoutOrder
-
-_Configuration.BackgroundColor3 = Color3.new(1, 1, 1)
-_Configuration.BackgroundTransparency = 1
-_Configuration.BorderColor3 = Color3.new(0, 0, 0)
-_Configuration.BorderSizePixel = 0
-_Configuration.Font = Enum.Font.SourceSans
-_Configuration.Name = [[_Configuration]]
-_Configuration.Parent = Main
-_Configuration.Position = UDim2.new(0.0268656723, 0, 0.0068965517, 0)
-_Configuration.Size = UDim2.new(0, 317, 0, 28)
-_Configuration.Text = [[Configuration]]
-_Configuration.TextColor3 = Color3.new(1, 1, 1)
-_Configuration.TextScaled = true
-_Configuration.TextSize = 14
-_Configuration.TextWrapped = true
-_Configuration.TextXAlignment = Enum.TextXAlignment.Left
-
-Result.BackgroundColor3 = Color3.new(1, 1, 1)
-Result.BorderColor3 = Color3.new(0, 0, 0)
-Result.BorderSizePixel = 0
-Result.Image = [[rbxasset://textures/ui/GuiImagePlaceholder.png]]
-Result.Name = [[Result]]
-Result.Parent = Main
-Result.Position = UDim2.new(0.0245114099, 0, 0.082354255, 0)
-Result.Size = UDim2.new(0, 299, 0, 95)
-
-ImageInfo.BackgroundColor3 = Color3.new(1, 1, 1)
-ImageInfo.BackgroundTransparency = 1
-ImageInfo.BorderColor3 = Color3.new(0, 0, 0)
-ImageInfo.BorderSizePixel = 0
-ImageInfo.Name = [[ImageInfo]]
-ImageInfo.Parent = Main
-ImageInfo.Size = UDim2.new(0, 335, 0, 40)
-
-Frame_1.BackgroundColor3 = Color3.new(1, 1, 1)
-Frame_1.BackgroundTransparency = 0.800000011920929
-Frame_1.BorderColor3 = Color3.new(0, 0, 0)
-Frame_1.BorderSizePixel = 0
-Frame_1.Parent = ImageInfo
-Frame_1.Position = UDim2.new(0.0298507456, 0, 0.172839507, 0)
-Frame_1.Size = UDim2.new(0.943283558, 0, 0.641975284, 0)
-
-Title_1.BackgroundColor3 = Color3.new(1, 1, 1)
-Title_1.BackgroundTransparency = 1
-Title_1.BorderColor3 = Color3.new(0, 0, 0)
-Title_1.BorderSizePixel = 0
-Title_1.Font = Enum.Font.SourceSans
-Title_1.Name = [[Title]]
-Title_1.Parent = Frame_1
-Title_1.Position = UDim2.new(0.0245112628, 0, 0.115384616, 0)
-Title_1.Size = UDim2.new(0.269233465, 0, 0.730769217, 0)
-Title_1.Text = [[URL/Path]]
-Title_1.TextColor3 = Color3.new(1, 1, 1)
-Title_1.TextScaled = true
-Title_1.TextSize = 14
-Title_1.TextWrapped = true
-Title_1.TextXAlignment = Enum.TextXAlignment.Left
-
-Opition1.BackgroundColor3 = Color3.new(0.282353, 0.282353, 0.282353)
-Opition1.BorderColor3 = Color3.new(0, 0, 0)
-Opition1.BorderSizePixel = 0
-Opition1.Font = Enum.Font.SourceSans
-Opition1.Name = [[Opition1]]
-Opition1.Parent = Frame_1
-Opition1.PlaceholderText = [[URL/Path here]]
-Opition1.Position = UDim2.new(0.338485628, 0, 0.230769247, 0)
-Opition1.Size = UDim2.new(0.633043528, 0, 0.538461566, 0)
-Opition1.Text = [[https://e7.pngegg.com/pngimages/221/316/png-clipart-laptop-nature-desktop-high-definition-video-1080p-nature-electronics-leaf-thumbnail.png]]
-Opition1.TextColor3 = Color3.new(1, 1, 1)
-Opition1.TextSize = 14
-Opition1.TextTruncate = Enum.TextTruncate.AtEnd
-
-Width.BackgroundColor3 = Color3.new(1, 1, 1)
-Width.BackgroundTransparency = 1
-Width.BorderColor3 = Color3.new(0, 0, 0)
-Width.BorderSizePixel = 0
-Width.Font = Enum.Font.SourceSans
-Width.Name = [[Width]]
-Width.Parent = Main
-Width.Position = UDim2.new(0.0268656723, 0, 0.409195393, 0)
-Width.Size = UDim2.new(0, 317, 0, 14)
-Width.Text = [[Width: ???]]
-Width.TextColor3 = Color3.new(1, 1, 1)
-Width.TextScaled = true
-Width.TextSize = 14
-Width.TextWrapped = true
-Width.TextXAlignment = Enum.TextXAlignment.Left
-
-Height.BackgroundColor3 = Color3.new(1, 1, 1)
-Height.BackgroundTransparency = 1
-Height.BorderColor3 = Color3.new(0, 0, 0)
-Height.BorderSizePixel = 0
-Height.Font = Enum.Font.SourceSans
-Height.Name = [[Height]]
-Height.Parent = Main
-Height.Position = UDim2.new(0.0268656723, 0, 0.409195393, 0)
-Height.Size = UDim2.new(0, 317, 0, 14)
-Height.Text = [[Height: ???]]
-Height.TextColor3 = Color3.new(1, 1, 1)
-Height.TextScaled = true
-Height.TextSize = 14
-Height.TextWrapped = true
-Height.TextXAlignment = Enum.TextXAlignment.Left
-
-Pixel.BackgroundColor3 = Color3.new(1, 1, 1)
-Pixel.BackgroundTransparency = 1
-Pixel.BorderColor3 = Color3.new(0, 0, 0)
-Pixel.BorderSizePixel = 0
-Pixel.Font = Enum.Font.SourceSans
-Pixel.Name = [[Pixel]]
-Pixel.Parent = Main
-Pixel.Position = UDim2.new(0.0268656723, 0, 0.409195393, 0)
-Pixel.Size = UDim2.new(0, 317, 0, 14)
-Pixel.Text = [[Pixel: ???]]
-Pixel.TextColor3 = Color3.new(1, 1, 1)
-Pixel.TextScaled = true
-Pixel.TextSize = 14
-Pixel.TextWrapped = true
-Pixel.TextXAlignment = Enum.TextXAlignment.Left
-
-Loader.BackgroundColor3 = Color3.new(1, 1, 1)
-Loader.BackgroundTransparency = 1
-Loader.BorderColor3 = Color3.new(0, 0, 0)
-Loader.BorderSizePixel = 0
-Loader.Font = Enum.Font.SourceSans
-Loader.Name = [[Loader]]
-Loader.Parent = Main
-Loader.Position = UDim2.new(0.0268656723, 0, 0.0068965517, 0)
-Loader.Size = UDim2.new(0, 317, 0, 28)
-Loader.Text = [[Loader]]
-Loader.TextColor3 = Color3.new(1, 1, 1)
-Loader.TextScaled = true
-Loader.TextSize = 14
-Loader.TextWrapped = true
-Loader.TextXAlignment = Enum.TextXAlignment.Left
-
-PlasticBlock.BackgroundColor3 = Color3.new(1, 1, 1)
-PlasticBlock.BackgroundTransparency = 1
-PlasticBlock.BorderColor3 = Color3.new(0, 0, 0)
-PlasticBlock.BorderSizePixel = 0
-PlasticBlock.Font = Enum.Font.SourceSans
-PlasticBlock.Name = [[PlasticBlock]]
-PlasticBlock.Parent = Main
-PlasticBlock.Position = UDim2.new(0.0268656723, 0, 0.409195393, 0)
-PlasticBlock.Size = UDim2.new(0, 317, 0, 14)
-PlasticBlock.Text = [[Plastic Block: ???]]
-PlasticBlock.TextColor3 = Color3.new(1, 1, 1)
-PlasticBlock.TextScaled = true
-PlasticBlock.TextSize = 14
-PlasticBlock.TextWrapped = true
-PlasticBlock.TextXAlignment = Enum.TextXAlignment.Left
-
-Configuration.BackgroundColor3 = Color3.new(1, 1, 1)
-Configuration.BackgroundTransparency = 1
-Configuration.BorderColor3 = Color3.new(0, 0, 0)
-Configuration.BorderSizePixel = 0
-Configuration.Name = [[Configuration]]
-Configuration.Parent = Main
-Configuration.Size = UDim2.new(0, 335, 0, 40)
-
-Scale.BackgroundColor3 = Color3.new(1, 1, 1)
-Scale.BackgroundTransparency = 0.800000011920929
-Scale.BorderColor3 = Color3.new(0, 0, 0)
-Scale.BorderSizePixel = 0
-Scale.Name = [[Scale]]
-Scale.Parent = Configuration
-Scale.Position = UDim2.new(-0.0799077749, 0, 0, 0)
-Scale.Size = UDim2.new(0.230690211, 0, 0.641975284, 0)
-
-Title_2.BackgroundColor3 = Color3.new(1, 1, 1)
-Title_2.BackgroundTransparency = 1
-Title_2.BorderColor3 = Color3.new(0, 0, 0)
-Title_2.BorderSizePixel = 0
-Title_2.Font = Enum.Font.SourceSans
-Title_2.Name = [[Title]]
-Title_2.Parent = Scale
-Title_2.Position = UDim2.new(0.0724145696, 0, 0.115384176, 0)
-Title_2.Size = UDim2.new(0.410009444, 0, 0.730769336, 0)
-Title_2.Text = [[Scale]]
-Title_2.TextColor3 = Color3.new(1, 1, 1)
-Title_2.TextScaled = true
-Title_2.TextSize = 14
-Title_2.TextWrapped = true
-Title_2.TextXAlignment = Enum.TextXAlignment.Left
-
-Opition1_1.BackgroundColor3 = Color3.new(0.282353, 0.282353, 0.282353)
-Opition1_1.BorderColor3 = Color3.new(0, 0, 0)
-Opition1_1.BorderSizePixel = 0
-Opition1_1.Font = Enum.Font.SourceSans
-Opition1_1.Name = [[Opition1]]
-Opition1_1.Parent = Scale
-Opition1_1.PlaceholderText = [[number here]]
-Opition1_1.Position = UDim2.new(0.482423991, 0, 0.230769545, 0)
-Opition1_1.Size = UDim2.new(0.489105105, 0, 0.538461566, 0)
-Opition1_1.Text = [[1]]
-Opition1_1.TextColor3 = Color3.new(1, 1, 1)
-Opition1_1.TextSize = 14
-Opition1_1.TextTruncate = Enum.TextTruncate.AtEnd
-
-UIListLayout_4.FillDirection = Enum.FillDirection.Horizontal
-UIListLayout_4.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout_4.Padding = UDim.new(0, 5)
-UIListLayout_4.Parent = Configuration
-UIListLayout_4.SortOrder = Enum.SortOrder.LayoutOrder
-
-Ratio.BackgroundColor3 = Color3.new(1, 1, 1)
-Ratio.BackgroundTransparency = 0.800000011920929
-Ratio.BorderColor3 = Color3.new(0, 0, 0)
-Ratio.BorderSizePixel = 0
-Ratio.Name = [[Ratio]]
-Ratio.Parent = Configuration
-Ratio.Position = UDim2.new(0.163134038, 0, 0, 0)
-Ratio.Size = UDim2.new(0.2306903, 0, 0.641975284, 0)
-
-Title_3.BackgroundColor3 = Color3.new(1, 1, 1)
-Title_3.BackgroundTransparency = 1
-Title_3.BorderColor3 = Color3.new(0, 0, 0)
-Title_3.BorderSizePixel = 0
-Title_3.Font = Enum.Font.SourceSans
-Title_3.Name = [[Title]]
-Title_3.Parent = Ratio
-Title_3.Position = UDim2.new(0.0724145696, 0, 0.115384176, 0)
-Title_3.Size = UDim2.new(0.410009444, 0, 0.730769336, 0)
-Title_3.Text = [[Ratio]]
-Title_3.TextColor3 = Color3.new(1, 1, 1)
-Title_3.TextScaled = true
-Title_3.TextSize = 14
-Title_3.TextWrapped = true
-Title_3.TextXAlignment = Enum.TextXAlignment.Left
-
-Opition1_2.BackgroundColor3 = Color3.new(0.282353, 0.282353, 0.282353)
-Opition1_2.BorderColor3 = Color3.new(0, 0, 0)
-Opition1_2.BorderSizePixel = 0
-Opition1_2.Font = Enum.Font.SourceSans
-Opition1_2.Name = [[Opition1]]
-Opition1_2.Parent = Ratio
-Opition1_2.PlaceholderText = [[number here]]
-Opition1_2.Position = UDim2.new(0.482423991, 0, 0.230769545, 0)
-Opition1_2.Size = UDim2.new(0.489105105, 0, 0.538461566, 0)
-Opition1_2.Text = [[1:1]]
-Opition1_2.TextColor3 = Color3.new(1, 1, 1)
-Opition1_2.TextSize = 14
-Opition1_2.TextTruncate = Enum.TextTruncate.AtEnd
-
-Rotate.BackgroundColor3 = Color3.new(1, 1, 1)
-Rotate.BackgroundTransparency = 0.800000011920929
-Rotate.BorderColor3 = Color3.new(0, 0, 0)
-Rotate.BorderSizePixel = 0
-Rotate.Name = [[Rotate]]
-Rotate.Parent = Configuration
-Rotate.Position = UDim2.new(0.406175941, 0, 0, 0)
-Rotate.Size = UDim2.new(0.230690122, 0, 0.641975284, 0)
-
-Title_4.BackgroundColor3 = Color3.new(1, 1, 1)
-Title_4.BackgroundTransparency = 1
-Title_4.BorderColor3 = Color3.new(0, 0, 0)
-Title_4.BorderSizePixel = 0
-Title_4.Font = Enum.Font.SourceSans
-Title_4.Name = [[Title]]
-Title_4.Parent = Rotate
-Title_4.Position = UDim2.new(0.0724145696, 0, 0.115384176, 0)
-Title_4.Size = UDim2.new(0.410009444, 0, 0.730769336, 0)
-Title_4.Text = [[Rotate]]
-Title_4.TextColor3 = Color3.new(1, 1, 1)
-Title_4.TextScaled = true
-Title_4.TextSize = 14
-Title_4.TextWrapped = true
-Title_4.TextXAlignment = Enum.TextXAlignment.Left
-
-Opition1_3.BackgroundColor3 = Color3.new(0.282353, 0.282353, 0.282353)
-Opition1_3.BorderColor3 = Color3.new(0, 0, 0)
-Opition1_3.BorderSizePixel = 0
-Opition1_3.Font = Enum.Font.SourceSans
-Opition1_3.Name = [[Opition1]]
-Opition1_3.Parent = Rotate
-Opition1_3.PlaceholderText = [[number here]]
-Opition1_3.Position = UDim2.new(0.572757542, 0, 0.230769545, 0)
-Opition1_3.Size = UDim2.new(0.398771465, 0, 0.538461566, 0)
-Opition1_3.Text = [[1]]
-Opition1_3.TextColor3 = Color3.new(1, 1, 1)
-Opition1_3.TextSize = 14
-Opition1_3.TextTruncate = Enum.TextTruncate.AtEnd
-
-Move.BackgroundColor3 = Color3.new(1, 1, 1)
-Move.BackgroundTransparency = 0.800000011920929
-Move.BorderColor3 = Color3.new(0, 0, 0)
-Move.BorderSizePixel = 0
-Move.Name = [[Move]]
-Move.Parent = Configuration
-Move.Position = UDim2.new(0.649217665, 0, 0, 0)
-Move.Size = UDim2.new(0.230690122, 0, 0.641975284, 0)
-
-Title_5.BackgroundColor3 = Color3.new(1, 1, 1)
-Title_5.BackgroundTransparency = 1
-Title_5.BorderColor3 = Color3.new(0, 0, 0)
-Title_5.BorderSizePixel = 0
-Title_5.Font = Enum.Font.SourceSans
-Title_5.Name = [[Title]]
-Title_5.Parent = Move
-Title_5.Position = UDim2.new(0.0724145696, 0, 0.115384176, 0)
-Title_5.Size = UDim2.new(0.410009444, 0, 0.730769336, 0)
-Title_5.Text = [[Move]]
-Title_5.TextColor3 = Color3.new(1, 1, 1)
-Title_5.TextScaled = true
-Title_5.TextSize = 14
-Title_5.TextWrapped = true
-Title_5.TextXAlignment = Enum.TextXAlignment.Left
-
-Opition1_4.BackgroundColor3 = Color3.new(0.282353, 0.282353, 0.282353)
-Opition1_4.BorderColor3 = Color3.new(0, 0, 0)
-Opition1_4.BorderSizePixel = 0
-Opition1_4.Font = Enum.Font.SourceSans
-Opition1_4.Name = [[Opition1]]
-Opition1_4.Parent = Move
-Opition1_4.PlaceholderText = [[number here]]
-Opition1_4.Position = UDim2.new(0.572757542, 0, 0.230769545, 0)
-Opition1_4.Size = UDim2.new(0.398771465, 0, 0.538461566, 0)
-Opition1_4.Text = [[1]]
-Opition1_4.TextColor3 = Color3.new(1, 1, 1)
-Opition1_4.TextSize = 14
-Opition1_4.TextTruncate = Enum.TextTruncate.AtEnd
-
-Configuration2.BackgroundColor3 = Color3.new(1, 1, 1)
-Configuration2.BackgroundTransparency = 1
-Configuration2.BorderColor3 = Color3.new(0, 0, 0)
-Configuration2.BorderSizePixel = 0
-Configuration2.Name = [[Configuration2]]
-Configuration2.Parent = Main
-Configuration2.Size = UDim2.new(0, 335, 0, 40)
-
-UIListLayout_5.FillDirection = Enum.FillDirection.Horizontal
-UIListLayout_5.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout_5.Padding = UDim.new(0, 5)
-UIListLayout_5.Parent = Configuration2
-UIListLayout_5.SortOrder = Enum.SortOrder.LayoutOrder
-
-Load.Active = false
-Load.BackgroundColor3 = Color3.new(1, 1, 1)
-Load.BackgroundTransparency = 0.800000011920929
-Load.BorderColor3 = Color3.new(0, 0, 0)
-Load.BorderSizePixel = 0
-Load.Name = [[Load]]
-Load.Parent = Configuration2
-Load.Position = UDim2.new(0.0298507456, 0, 0.172839358, 0)
-Load.Selectable = false
-Load.Size = UDim2.new(0.319287896, 0, 0.641975284, 0)
-Load.Text = [[]]
-
-Title_6.BackgroundColor3 = Color3.new(1, 1, 1)
-Title_6.BackgroundTransparency = 1
-Title_6.BorderColor3 = Color3.new(0, 0, 0)
-Title_6.BorderSizePixel = 0
-Title_6.Font = Enum.Font.SourceSans
-Title_6.Name = [[Title]]
-Title_6.Parent = Load
-Title_6.Position = UDim2.new(0.0724149272, 0, 0.115384176, 0)
-Title_6.Size = UDim2.new(0.709182799, 0, 0.730769336, 0)
-Title_6.Text = [[Load]]
-Title_6.TextColor3 = Color3.new(1, 1, 1)
-Title_6.TextScaled = true
-Title_6.TextSize = 14
-Title_6.TextWrapped = true
-Title_6.TextXAlignment = Enum.TextXAlignment.Left
-
-ImageLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-ImageLabel.BackgroundTransparency = 1
-ImageLabel.BorderColor3 = Color3.new(0, 0, 0)
-ImageLabel.BorderSizePixel = 0
-ImageLabel.Image = [[http://www.roblox.com/asset/?id=9468220156]]
-ImageLabel.Parent = Load
-ImageLabel.Position = UDim2.new(0.719885528, 0, 0, 0)
-ImageLabel.Size = UDim2.new(1, 0, 1, 0)
-
-UIAspectRatioConstraint_3.Parent = ImageLabel
-
-Preview.Active = false
-Preview.BackgroundColor3 = Color3.new(1, 1, 1)
-Preview.BackgroundTransparency = 0.800000011920929
-Preview.BorderColor3 = Color3.new(0, 0, 0)
-Preview.BorderSizePixel = 0
-Preview.Name = [[Preview]]
-Preview.Parent = Configuration2
-Preview.Position = UDim2.new(0.0298507456, 0, 0.172839358, 0)
-Preview.Selectable = false
-Preview.Size = UDim2.new(0.319287896, 0, 0.641975284, 0)
-Preview.Text = [[]]
-
-Title_7.BackgroundColor3 = Color3.new(1, 1, 1)
-Title_7.BackgroundTransparency = 1
-Title_7.BorderColor3 = Color3.new(0, 0, 0)
-Title_7.BorderSizePixel = 0
-Title_7.Font = Enum.Font.SourceSans
-Title_7.Name = [[Title]]
-Title_7.Parent = Preview
-Title_7.Position = UDim2.new(0.0724149272, 0, 0.115384176, 0)
-Title_7.Size = UDim2.new(0.709182799, 0, 0.730769336, 0)
-Title_7.Text = [[Preview]]
-Title_7.TextColor3 = Color3.new(1, 1, 1)
-Title_7.TextScaled = true
-Title_7.TextSize = 14
-Title_7.TextWrapped = true
-Title_7.TextXAlignment = Enum.TextXAlignment.Left
-
-ImageLabel_1.BackgroundColor3 = Color3.new(1, 1, 1)
-ImageLabel_1.BackgroundTransparency = 1
-ImageLabel_1.BorderColor3 = Color3.new(0, 0, 0)
-ImageLabel_1.BorderSizePixel = 0
-ImageLabel_1.Image = [[http://www.roblox.com/asset/?id=9468220156]]
-ImageLabel_1.Parent = Preview
-ImageLabel_1.Position = UDim2.new(0.719885528, 0, 0, 0)
-ImageLabel_1.Size = UDim2.new(1, 0, 1, 0)
-
-UIAspectRatioConstraint_4.Parent = ImageLabel_1
-
-LocationInfo.BackgroundColor3 = Color3.new(1, 1, 1)
-LocationInfo.BackgroundTransparency = 1
-LocationInfo.BorderColor3 = Color3.new(0, 0, 0)
-LocationInfo.BorderSizePixel = 0
-LocationInfo.Name = [[LocationInfo]]
-LocationInfo.Parent = Main
-LocationInfo.Size = UDim2.new(0, 335, 0, 40)
-
-UIListLayout_6.FillDirection = Enum.FillDirection.Horizontal
-UIListLayout_6.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout_6.Padding = UDim.new(0, 5)
-UIListLayout_6.Parent = LocationInfo
-UIListLayout_6.SortOrder = Enum.SortOrder.LayoutOrder
-
-Position.BackgroundColor3 = Color3.new(1, 1, 1)
-Position.BackgroundTransparency = 0.800000011920929
-Position.BorderColor3 = Color3.new(0, 0, 0)
-Position.BorderSizePixel = 0
-Position.Name = [[Position]]
-Position.Parent = LocationInfo
-Position.Position = UDim2.new(0.0298507456, 0, 0.172839358, 0)
-Position.Size = UDim2.new(0.319287896, 0, 0.641975284, 0)
-
-TitlePos.BackgroundColor3 = Color3.new(1, 1, 1)
-TitlePos.BackgroundTransparency = 1
-TitlePos.BorderColor3 = Color3.new(0, 0, 0)
-TitlePos.BorderSizePixel = 0
-TitlePos.Font = Enum.Font.SourceSans
-TitlePos.Name = [[TitlePos]]
-TitlePos.Parent = Position
-TitlePos.Position = UDim2.new(0.0537165999, 0, 0.115384176, 0)
-TitlePos.Size = UDim2.new(0.88754791, 0, 0.730769336, 0)
-TitlePos.Text = [[Position: 0,0,0]]
-TitlePos.TextColor3 = Color3.new(1, 1, 1)
-TitlePos.TextScaled = true
-TitlePos.TextSize = 14
-TitlePos.TextWrapped = true
-
-Orientation.BackgroundColor3 = Color3.new(1, 1, 1)
-Orientation.BackgroundTransparency = 0.800000011920929
-Orientation.BorderColor3 = Color3.new(0, 0, 0)
-Orientation.BorderSizePixel = 0
-Orientation.Name = [[Orientation]]
-Orientation.Parent = LocationInfo
-Orientation.Position = UDim2.new(0.0298507456, 0, 0.172839358, 0)
-Orientation.Size = UDim2.new(0.319287896, 0, 0.641975284, 0)
-
-TitleOrientation.BackgroundColor3 = Color3.new(1, 1, 1)
-TitleOrientation.BackgroundTransparency = 1
-TitleOrientation.BorderColor3 = Color3.new(0, 0, 0)
-TitleOrientation.BorderSizePixel = 0
-TitleOrientation.Font = Enum.Font.SourceSans
-TitleOrientation.Name = [[TitleOrientation]]
-TitleOrientation.Parent = Orientation
-TitleOrientation.Position = UDim2.new(0.0537165999, 0, 0.115384176, 0)
-TitleOrientation.Size = UDim2.new(0.88754791, 0, 0.730769336, 0)
-TitleOrientation.Text = [[Orientation: 0,0,0]]
-TitleOrientation.TextColor3 = Color3.new(1, 1, 1)
-TitleOrientation.TextScaled = true
-TitleOrientation.TextSize = 14
-TitleOrientation.TextWrapped = true
-
-PlasticBlockNeed.BackgroundColor3 = Color3.new(1, 1, 1)
-PlasticBlockNeed.BackgroundTransparency = 1
-PlasticBlockNeed.BorderColor3 = Color3.new(0, 0, 0)
-PlasticBlockNeed.BorderSizePixel = 0
-PlasticBlockNeed.Font = Enum.Font.SourceSans
-PlasticBlockNeed.Name = [[PlasticBlockNeed]]
-PlasticBlockNeed.Parent = Main
-PlasticBlockNeed.Position = UDim2.new(0.0268656723, 0, 0.409195393, 0)
-PlasticBlockNeed.Size = UDim2.new(0, 317, 0, 14)
-PlasticBlockNeed.Text = [[Plastic Block Need: ???]]
-PlasticBlockNeed.TextColor3 = Color3.new(1, 1, 1)
-PlasticBlockNeed.TextScaled = true
-PlasticBlockNeed.TextSize = 14
-PlasticBlockNeed.TextWrapped = true
-PlasticBlockNeed.TextXAlignment = Enum.TextXAlignment.Left
-
-UIScale.Parent = ImageLoader
-
--- End --
--- Thank for using --
-
-local UserInputService = game:GetService("UserInputService")
-
-local Gui = game.Players.LocalPlayer.PlayerGui
-if game:GetService("RunService"):IsStudio() then
-	Gui = game.Players.LocalPlayer.PlayerGui
-else
-	Gui = game:FindFirstChild("CoreGui")
-end
-
-if Gui:FindFirstChild("ImageLoader") then
-	Gui.ImageLoader:Destroy()
-end
-
-ImageLoader.Parent = Gui
-
-local BATCH_SIZE = 100 -- Số lượng pixel xử lý mỗi đợt (50 pixel = 150 requests). Đừng tăng quá 100.
-local REPLICATION_DELAY = .5 -- Thời gian đợi block hiện ra (giây). Mạng ngon có thể giảm xuống 0.1
-local SAFE_ZONE_NAME = game.Players.LocalPlayer.TeamColor.Name .. "Zone"
-
-local scale = 1
-local ratio = {1,1}
-local rotate = 90
-local move = 1
-
-function Create_Resize(Part)
-	local ResizeTop = Instance.new("Handles")
-	local ResizeBottom = Instance.new("Handles")
-	local ResizeLeft = Instance.new("Handles")
-	local ResizeRight = Instance.new("Handles")
-	local ResizeFront = Instance.new("Handles")
-	local ResizeBack = Instance.new("Handles")
-
-	ResizeTop.Adornee = Part
-	ResizeTop.Color3 = Color3.new(0, 0.8, 0)
-	ResizeTop.Faces = Faces.new(Enum.NormalId.Top)
-	ResizeTop.Name = [[ResizeTop]]
-	ResizeTop.Parent = Part
-
-	ResizeBottom.Adornee = Part
-	ResizeBottom.Color3 = Color3.new(0, 0.8, 0)
-	ResizeBottom.Faces = Faces.new(Enum.NormalId.Bottom)
-	ResizeBottom.Name = [[ResizeBottom]]
-	ResizeBottom.Parent = Part
-
-	ResizeLeft.Adornee = Part
-	ResizeLeft.Color3 = Color3.new(0.8, 0, 0)
-	ResizeLeft.Faces = Faces.new(Enum.NormalId.Left)
-	ResizeLeft.Name = [[ResizeLeft]]
-	ResizeLeft.Parent = Part
-
-	ResizeRight.Adornee = Part
-	ResizeRight.Color3 = Color3.new(0.8, 0, 0)
-	ResizeRight.Faces = Faces.new(Enum.NormalId.Right)
-	ResizeRight.Name = [[ResizeRight]]
-	ResizeRight.Parent = Part
-
-	ResizeFront.Adornee = Part
-	ResizeFront.Color3 = Color3.new(0, 0, 0.8)
-	ResizeFront.Faces = Faces.new(Enum.NormalId.Front)
-	ResizeFront.Name = [[ResizeFront]]
-	ResizeFront.Parent = Part
-
-	ResizeBack.Adornee = Part
-	ResizeBack.Color3 = Color3.new(0, 0, 0.8)
-	ResizeBack.Faces = Faces.new(Enum.NormalId.Back)
-	ResizeBack.Name = [[ResizeBack]]
-	ResizeBack.Parent = Part
-
-	return ResizeTop,ResizeBottom,ResizeLeft,ResizeRight,ResizeFront,ResizeBack
-end
-
-function Create_ArcHandles(Part)
-	local ArcHandles = Instance.new("ArcHandles")
-	ArcHandles.Name = "Rotate"
-	ArcHandles.Adornee = Part
-	ArcHandles.Parent = Part
-	return ArcHandles
-end
-
-function _SetConnectsResize(Resize,Cd,Cu)
-	Resize.MouseButton1Down:Connect(function()
-		Resize.Color3 = Cd
-	end)
-	Resize.MouseButton1Up:Connect(function()
-		Resize.Color3 = Cu
-	end)
-end
-
-function _SetConnectsArcHandles(ArcHandles,Cd,Cu)
-	ArcHandles.MouseButton1Down:Connect(function()
-		ArcHandles.Color3 = Cd
-	end)
-	ArcHandles.MouseButton1Up:Connect(function()
-		ArcHandles.Color3 = Cu
-	end)
-end
-
-function SetupBuildMode(PreviewPart)
-	local Rtop,Rbottom,Rleft,Rright,Rfront,Rback = Create_Resize(PreviewPart)
-	local Rotate = Create_ArcHandles(PreviewPart)
-	Rtop.Parent,Rbottom.Parent,Rleft.Parent,Rright.Parent,Rfront.Parent,Rback.Parent = Gui,Gui,Gui,Gui,Gui,Gui
-	Rotate.Parent = Gui
-	--local Rotate = Create_ArcHandles(PreviewPart)
-	local SizeX = PreviewPart.Size.X
-	local SizeY = PreviewPart.Size.Y
-	local SizeZ = PreviewPart.Size.Z
-	local PreviousCFrame = PreviewPart.CFrame
-
-	local Mode = "Movement"
-	Rotate.Visible = false
-
-	local function update()
-		if Mode == "Movement" then
-			Rtop.Style = Enum.HandlesStyle.Movement
-			Rbottom.Style = Enum.HandlesStyle.Movement
-			Rleft.Style = Enum.HandlesStyle.Movement
-			Rright.Style = Enum.HandlesStyle.Movement
-			Rfront.Style = Enum.HandlesStyle.Movement
-			Rback.Style = Enum.HandlesStyle.Movement
-
-			Rtop.Visible = true
-			Rbottom.Visible = true
-			Rleft.Visible = true
-			Rright.Visible = true
-			Rfront.Visible = true
-			Rback.Visible = true
-
-			Rotate.Visible = false
-		elseif Mode == "Rotation" then
-			Rtop.Visible = false
-			Rbottom.Visible = false
-			Rleft.Visible = false
-			Rright.Visible = false
-			Rfront.Visible = false
-			Rback.Visible = false
-
-			Rotate.Visible = true
-		elseif Mode == "Resize" then
-			Rtop.Style = Enum.HandlesStyle.Resize
-			Rbottom.Style = Enum.HandlesStyle.Resize
-			Rleft.Style = Enum.HandlesStyle.Resize
-			Rright.Style = Enum.HandlesStyle.Resize
-			Rfront.Style = Enum.HandlesStyle.Resize
-			Rback.Style = Enum.HandlesStyle.Resize
-
-			Rtop.Visible = true
-			Rbottom.Visible = true
-			Rleft.Visible = true
-			Rright.Visible = true
-			Rfront.Visible = true
-			Rback.Visible = true
-
-			Rotate.Visible = false
-		end
-	end
-
-	local function SnapNumber(number,snap)
-		if snap == 0 then
-			return number
-		else
-			return math.floor(number/snap+0.5)*snap
-		end
-	end
-
-	update()
-
-	UserInputService.InputBegan:Connect(function(Input)
-		if Input.KeyCode == Enum.KeyCode.F then
-			if Mode == "Movement" then
-				Mode = "Rotation"
-			elseif Mode == "Rotation" then
-				Mode = "Movement"
-			end
-			update()
-		end
-	end)
-
-	_SetConnectsResize(Rtop,Color3.new(0,1,0),Color3.new(0,0.8,0))
-	Rtop.MouseDrag:Connect(function(Face,Distance)
-		if Mode == "Resize" then
-			if PreviewPart.Size.Y > 0.002 then
-				PreviewPart.Size = Vector3.new(SizeX,SizeY+Distance,SizeZ)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,Distance/2,0)
-			elseif Distance > 0 then
-				PreviewPart.Size = Vector3.new(SizeX,SizeY+Distance,SizeZ)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,Distance/2,0)
-			end
-		elseif Mode == "Movement" then
-			PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,SnapNumber(Distance,move),0)
-		end
-	end)
-	Rtop.MouseButton1Up:Connect(function()
-		SizeX = PreviewPart.Size.X 
-		SizeY = PreviewPart.Size.Y 
-		SizeZ = PreviewPart.Size.Z
-		PreviousCFrame = PreviewPart.CFrame
-	end)
-
-	_SetConnectsResize(Rbottom,Color3.new(0,1,0),Color3.new(0,0.8,0))
-	Rbottom.MouseDrag:Connect(function(Face,Distance)
-		if Mode == "Resize" then
-			if PreviewPart.Size.Y > 0.002 then
-				PreviewPart.Size = Vector3.new(SizeX,SizeY+Distance,SizeZ)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,-Distance/2,0)
-			elseif Distance > 0 then
-				PreviewPart.Size = Vector3.new(SizeX,SizeY+Distance,SizeZ)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,-Distance/2,0)
-			end
-		elseif Mode == "Movement" then
-			PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,SnapNumber(-Distance,move),0)
-		end
-	end)
-	Rbottom.MouseButton1Up:Connect(function()
-		SizeX = PreviewPart.Size.X 
-		SizeY = PreviewPart.Size.Y 
-		SizeZ = PreviewPart.Size.Z
-		PreviousCFrame = PreviewPart.CFrame
-	end)
-
-	_SetConnectsResize(Rleft,Color3.new(1,0,0),Color3.new(0.8,0,0))
-	Rleft.MouseDrag:Connect(function(Face,Distance)
-		if Mode == "Resize" then
-			if PreviewPart.Size.X > 0.002 then
-				PreviewPart.Size = Vector3.new(SizeX+Distance,SizeY,SizeZ)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(-Distance/2,0,0)
-			elseif Distance > 0 then
-				PreviewPart.Size = Vector3.new(SizeX+Distance,SizeY,SizeZ)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(-Distance/2,0,0)
-			end
-		elseif Mode == "Movement" then
-			PreviewPart.CFrame = PreviousCFrame * CFrame.new(SnapNumber(-Distance,move),0,0)
-		end
-	end)
-	Rleft.MouseButton1Up:Connect(function()
-		SizeX = PreviewPart.Size.X 
-		SizeY = PreviewPart.Size.Y 
-		SizeZ = PreviewPart.Size.Z
-		PreviousCFrame = PreviewPart.CFrame
-	end)
-
-	_SetConnectsResize(Rright,Color3.new(1,0,0),Color3.new(0.8,0,0))
-	Rright.MouseDrag:Connect(function(Face,Distance)
-		if Mode == "Resize" then
-			if PreviewPart.Size.X > 0.002 then
-				PreviewPart.Size = Vector3.new(SizeX+Distance,SizeY,SizeZ)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(Distance/2,0,0)
-			elseif Distance > 0 then
-				PreviewPart.Size = Vector3.new(SizeX+Distance,SizeY,SizeZ)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(Distance/2,0,0)
-			end
-		elseif Mode == "Movement" then
-			PreviewPart.CFrame = PreviousCFrame * CFrame.new(SnapNumber(Distance,move),0,0)
-		end
-	end)
-	Rright.MouseButton1Up:Connect(function()
-		SizeX = PreviewPart.Size.X 
-		SizeY = PreviewPart.Size.Y 
-		SizeZ = PreviewPart.Size.Z
-		PreviousCFrame = PreviewPart.CFrame
-	end)
-
-	_SetConnectsResize(Rfront,Color3.new(0,0,1),Color3.new(0,0,0.8))
-	Rfront.MouseDrag:Connect(function(Face,Distance)
-		if Mode == "Resize" then
-			if PreviewPart.Size.Z > 0.002 then
-				PreviewPart.Size = Vector3.new(SizeX,SizeY,SizeZ+Distance)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,0,-Distance/2)
-			elseif Distance > 0 then
-				PreviewPart.Size = Vector3.new(SizeX,SizeY,SizeZ+Distance)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,0,-Distance/2)
-			end
-		elseif Mode == "Movement" then
-			PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,0,SnapNumber(-Distance,move))
-		end
-	end)
-	Rfront.MouseButton1Up:Connect(function()
-		SizeX = PreviewPart.Size.X 
-		SizeY = PreviewPart.Size.Y 
-		SizeZ = PreviewPart.Size.Z
-		PreviousCFrame = PreviewPart.CFrame
-	end)
-
-	_SetConnectsResize(Rback,Color3.new(0,0,1),Color3.new(0,0,0.8))
-	Rback.MouseDrag:Connect(function(Face,Distance)
-		if Mode == "Resize" then
-			if PreviewPart.Size.Z > 0.002 then
-				PreviewPart.Size = Vector3.new(SizeX,SizeY,SizeZ+Distance)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,0,Distance/2)
-			elseif Distance > 0 then
-				PreviewPart.Size = Vector3.new(SizeX,SizeY,SizeZ+Distance)
-				PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,0,Distance/2)
-			end
-		elseif Mode == "Movement" then
-			PreviewPart.CFrame = PreviousCFrame * CFrame.new(0,0,SnapNumber(Distance,move))
-		end
-	end)
-	Rback.MouseButton1Up:Connect(function()
-		SizeX = PreviewPart.Size.X 
-		SizeY = PreviewPart.Size.Y 
-		SizeZ = PreviewPart.Size.Z
-		PreviousCFrame = PreviewPart.CFrame
-	end)
-
-	_SetConnectsArcHandles(Rotate,Color3.new(0,0,1),Color3.new(0,0,0.8))
-
-	Rotate.MouseDrag:Connect(function(Axis,RelativeAngle,DeltaRadius)
-		local AxisAngle = Vector3.FromAxis(Axis)
-		AxisAngle = AxisAngle * RelativeAngle
-		local x,y,z = SnapNumber(AxisAngle.X,rotate),SnapNumber(AxisAngle.Y,rotate),SnapNumber(AxisAngle.Z,rotate)
-		PreviewPart.CFrame = PreviousCFrame * CFrame.Angles(x,y,z)
-	end)
-
-	Rotate.MouseButton1Up:Connect(function()
-		PreviousCFrame = PreviewPart.CFrame
-	end)
-
-	PreviewPart.Destroying:Connect(function()
-		Rtop:Destroy() Rbottom:Destroy()
-		Rleft:Destroy() Rright:Destroy()
-		Rfront:Destroy() Rback:Destroy()
-		Rotate:Destroy()
-	end)
-end
-
-UIScale.Parent = ImageLoader
-
-if not isfolder("ImageLoaderBabft") then
-	makefolder("ImageLoaderBabft")
-end
-local function safeDownload(path, url)
-	if not isfile(path) then
-		local success, response = pcall(function()
-			return game:HttpGet(url)
-		end)
-		if success and response and type(response) == "string" then
-			writefile(path, response)
-		else
-			print(respone)
-			writefile(path, "nothing")
-		end
-	end
-end
-
-safeDownload("ImageLoaderBabft/icon.png", "https://i.ibb.co/rRbszL38/Gemini-Generated-Image-ijup61ijup61ijup-removebg-preview.png")
-safeDownload("ImageLoaderBabft/minimize.png", "https://cpng.pikpng.com/pngl/s/140-1407361_minimize-icon-png-minimize-button-icon-png-clipart.png")
-safeDownload("ImageLoaderBabft/close.png", "https://images.icon-icons.com/822/PNG/512/close_icon-icons.com_66473.png")
-
-
-Icon.Image = getcustomasset("ImageLoaderBabft/icon.png")
-Minimize.Image = getcustomasset("ImageLoaderBabft/minimize.png")
-Close.Image = getcustomasset("ImageLoaderBabft/close.png")
-
-local PNG = loadstring(game:HttpGet("https://raw.githubusercontent.com/HairBaconGamming/PNG-Reader-Roblox-Exploit/main/Main.lua"))()
-
-local MyPNGdata = {
-	["Data"] = '',
-	["PNG"] = {}
+--[[
+    BABFT IMAGE LOADER - TITANIUM FIXED
+    Version: 5.5.2 (Real-time Stats Edition)
+    
+    [CHANGELOG v5.5.2]
+    + Feature: Estimated Cost now calculates the EXACT number of compressed blocks needed (Smart Calc).
+    + Feature: Available Blocks count updates automatically every 0.5s.
+    + UI: Increased text size for Stats (Available/Cost) for better visibility.
+    + Fixed: Scale verification logic checks 'PPart.Size'.
+]]--
+
+-- // 1. ENVIRONMENT & SERVICES //
+local Services = {
+    Players = game:GetService("Players"),
+    RunService = game:GetService("RunService"),
+    TweenService = game:GetService("TweenService"),
+    UserInputService = game:GetService("UserInputService"),
+    HttpService = game:GetService("HttpService"),
+    CoreGui = game:GetService("CoreGui"),
+    Workspace = game:GetService("Workspace")
 }
 
-local previewpart
+local LocalPlayer = Services.Players.LocalPlayer
+local getcustomasset = getcustomasset or getsynasset
+local writefile = writefile
+local readfile = readfile
+local isfile = isfile
+local makefolder = makefolder
+local isfolder = isfolder
+local delfile = delfile
 
-Close.MouseButton1Click:Connect(function()
-	ImageLoader:Destroy()
-end)
-
-local old = Opition1.Text
-Opition1.FocusLost:Connect(function(enter)
-	if Opition1.Text == "" then
-		return
-	end
-	if enter then
-		local succes,reason = pcall(function()
-			game:HttpGet(Opition1.Text)
-		end)
-		if succes then
-			MyPNGdata.Data = game:HttpGet(Opition1.Text)
-		elseif isfile(Opition1.Text) and (Opition1.Text:find(".png") or Opition1.Text:find(".PNG")) then
-			MyPNGdata.Data = readfile(Opition1.Text)
-		else
-			warn("error to trying get image.")
-			Opition1.Text = old
-			return
-		end
-		if MyPNGdata.Data ~= "" then
-			writefile("ImageLoaderBabft/preview.png",MyPNGdata.Data)
-			Result.Image = getcustomasset("ImageLoaderBabft/preview.png")
-		else
-			Result.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-		end
-		local data = PNG.new(MyPNGdata.Data)
-		local ascale = {
-			data.Width/150,
-			data.Height/150,
-		}
-		if data.Width > 150 then
-			Result.Size = UDim2.fromOffset(data.Width/ascale[1],data.Height/ascale[1])
-			if data.Height > 150 then
-				Result.Size = UDim2.fromOffset(data.Width/ascale[1]/ascale[2],data.Height/ascale[1]/ascale[2])
-			end
-		else
-			Result.Size = UDim2.fromOffset(data.Width,data.Height)
-		end
-		Width.Text = "Width: " .. data.Width
-		Height.Text = "Height: " ..data.Height
-		Pixel.Text = "Pixels: ".. data.Width * data.Height
-		MyPNGdata.PNG = data
-		PlasticBlockNeed.Text = "Plastic Block Need: " .. math.round((data.Width * data.Height)*(scale/2))
-		old = Opition1.Text
-	else
-		Opition1.Text = old
-	end
-end)
-
-PlasticBlock.Text = "Plastic Block: ".. math.floor(game:GetService("Players").LocalPlayer.Data.PlasticBlock.Value - game:GetService("Players").LocalPlayer.Data.PlasticBlock.Used.Value)
-game:GetService("Players").LocalPlayer.Data.PlasticBlock.Changed:Connect(function()
-	PlasticBlock.Text = "Plastic Block: ".. math.floor(game:GetService("Players").LocalPlayer.Data.PlasticBlock.Value - game:GetService("Players").LocalPlayer.Data.PlasticBlock.Used.Value)
-end)
-game:GetService("Players").LocalPlayer.Data.PlasticBlock.Used.Changed:Connect(function()
-	PlasticBlock.Text = "Plastic Block: ".. math.floor(game:GetService("Players").LocalPlayer.Data.PlasticBlock.Value - game:GetService("Players").LocalPlayer.Data.PlasticBlock.Used.Value)
-end)
-
-
-local myzone = workspace:FindFirstChild(SAFE_ZONE_NAME)
-
-if not myzone then
-	warn("Không tìm thấy Zone của bạn: " .. SAFE_ZONE_NAME)
-	ImageLoader:Destroy()
-	return
+if makefolder and not isfolder("ImageLoaderBabft") then
+    makefolder("ImageLoaderBabft")
 end
 
-local currentcframe = myzone.CFrame
+-- // 2. UTILS LIBRARY //
+local Utils = {}
 
-Opition1_1.Text = scale
-Opition1_2.Text = ratio[1]..":"..ratio[2]
-Opition1_3.Text = rotate
-Opition1_4.Text = move
-
-Preview.MouseButton1Click:Connect(function()
-	if MyPNGdata.PNG == {} then
-		return
-	end
-	if previewpart then
-		previewpart:Destroy()
-		previewpart = nil
-	else
-		previewpart = Instance.new("Part",workspace)
-		previewpart.Size = Vector3.new(MyPNGdata.PNG.Width*scale,MyPNGdata.PNG.Height*scale,scale)
-		previewpart.CFrame = currentcframe
-		previewpart.Transparency = 1
-		previewpart.CanCollide = false
-		previewpart.Anchored = true
-		local SelectionBox = Instance.new("SelectionBox",previewpart)
-		SelectionBox.Adornee = previewpart
-		SelectionBox.Color3 = Color3.new(1,1,1)
-		SelectionBox.SurfaceTransparency = 0.8
-		SelectionBox.SurfaceColor3 = Color3.new(1,1,1)
-		SetupBuildMode(previewpart)
-	end
-end)
-Opition1_1.FocusLost:Connect(function(enter)
-	if enter then
-		if tonumber(Opition1_1.Text) then
-			scale = math.clamp(tonumber(Opition1_1.Text),0.05,math.huge)
-			Opition1_1.Text = scale
-		else
-			Opition1_1.Text = scale
-		end
-	else
-		Opition1_1.Text = scale
-	end
-	PlasticBlockNeed.Text = "Plastic Block Need: " .. math.round((MyPNGdata.PNG.Width * MyPNGdata.PNG.Height)*(scale/2))
-end)
-Opition1_4.FocusLost:Connect(function(enter)
-	if enter then
-		if tonumber(Opition1_4.Text) then
-			move = tonumber(Opition1_4.Text)
-		else
-			Opition1_4.Text = move
-		end
-	else
-		Opition1_4.Text = move
-	end
-end)
-Opition1_3.FocusLost:Connect(function(enter)
-	if enter then
-		if tonumber(Opition1_3.Text) then
-			rotate = tonumber(Opition1_3.Text)
-		else
-			Opition1_3.Text = rotate
-		end
-	else
-		Opition1_3.Text = rotate
-	end
-end)
-
-local RunService = game:GetService("RunService")
--- Tối ưu hóa OverlapParams (Tạo 1 lần dùng mãi mãi)
-local safeOverlapParams = OverlapParams.new()
---safeOverlapParams.FilterType = Enum.RaycastFilterType.Include
-local Player = game:GetService("Players").LocalPlayer
-local BlockFolder = workspace.Blocks:WaitForChild(Player.Name)
---safeOverlapParams.FilterDescendantsInstances = {BlockFolder}
-
-local function FastBuild(cframe, mouseTarget)
-	local Tool = Player.Character:FindFirstChild("BuildingTool") or Player.Backpack:FindFirstChild("BuildingTool")
-	if not Tool then return end
-
-	local relativeCF = mouseTarget.CFrame:ToObjectSpace(cframe)
-	local args = {
-		[1] = "PlasticBlock",
-		[2] = Player.Data.PlasticBlock.Value,
-		[3] = mouseTarget,
-		[4] = relativeCF,
-		[5] = true,
-		[6] = cframe,
-		[7] = false
-	}
-	Tool.RF:InvokeServer(unpack(args))
+function Utils.Snap(number, step)
+    if step == 0 then return number end
+    return math.floor(number / step + 0.5) * step
 end
 
-local function FastPaint(block, color)
-	local Tool = Player.Character:FindFirstChild("PaintingTool") or Player.Backpack:FindFirstChild("PaintingTool")
-	if not Tool or not block then print('cant paint') return end
-	Tool.RF:InvokeServer({ {{block, color}} })
+-- // 3. UI FRAMEWORK //
+local UI = {
+    Theme = {
+        Main = Color3.fromRGB(25, 25, 30),
+        Sidebar = Color3.fromRGB(35, 35, 40),
+        Section = Color3.fromRGB(45, 45, 50),
+        Text = Color3.fromRGB(240, 240, 240),
+        SubText = Color3.fromRGB(160, 160, 160),
+        Accent = Color3.fromRGB(60, 130, 246),
+        Success = Color3.fromRGB(34, 197, 94),
+        Warn = Color3.fromRGB(234, 179, 8),
+        Error = Color3.fromRGB(239, 68, 68),
+        Font = Enum.Font.GothamMedium,
+        FontBold = Enum.Font.GothamBold
+    },
+    ScreenGui = nil,
+    Notifications = nil,
+    ProgressBar = nil
+}
+
+function UI.Init()
+    if Services.CoreGui:FindFirstChild("TitaniumUI") then Services.CoreGui.TitaniumUI:Destroy() end
+    
+    UI.ScreenGui = Instance.new("ScreenGui")
+    UI.ScreenGui.Name = "TitaniumUI"
+    UI.ScreenGui.ResetOnSpawn = false
+    UI.ScreenGui.IgnoreGuiInset = true
+    UI.ScreenGui.Parent = Services.CoreGui
+    
+    UI.Notifications = Instance.new("Frame")
+    UI.Notifications.Name = "Notifications"
+    UI.Notifications.BackgroundTransparency = 1
+    UI.Notifications.Position = UDim2.new(1, -320, 0, 20)
+    UI.Notifications.Size = UDim2.new(0, 300, 1, -40)
+    UI.Notifications.Parent = UI.ScreenGui
+    
+    local list = Instance.new("UIListLayout")
+    list.Padding = UDim.new(0, 10)
+    list.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    list.SortOrder = Enum.SortOrder.LayoutOrder
+    list.Parent = UI.Notifications
 end
-local CollectionService = game:GetService("CollectionService")
-local function FastPaintBatched(paintDataList)
-	local Tool = Player.Character:FindFirstChild("PaintingTool") or Player.Backpack:FindFirstChild("PaintingTool")
-	if not Tool then return end
-	-- Gửi toàn bộ list {{block, color}, ...} trong 1 request
-	Tool.RF:InvokeServer(paintDataList)
-	
-	for i,v in pairs(paintDataList) do
-		local block, color = v[1], v[2]
-		block.PPart.Color = color
-		if i%500 == 0 then
-			RunService.Heartbeat:Wait()
-		end
-	end
+
+function UI.Create(class, props, children)
+    local obj = Instance.new(class)
+    for k, v in pairs(props or {}) do obj[k] = v end
+    if children then for _, c in pairs(children) do c.Parent = obj end end
+    return obj
 end
 
-local function FastScale(block, s, cframe)
-	local Tool = Player.Character:FindFirstChild("ScalingTool") or Player.Backpack:FindFirstChild("ScalingTool")
-	if not Tool or not block then return end
-	Tool.RF:InvokeServer(block, Vector3.new(s, s, s), cframe)
+function UI.Corner(r, p) return UI.Create("UICorner", {CornerRadius = UDim.new(0, r), Parent = p}) end
+function UI.Stroke(t, c, p) return UI.Create("UIStroke", {Thickness = t, Color = c, Parent = p}) end
+
+function UI.Notify(title, content, type, duration)
+    local color = UI.Theme.Accent
+    if type == "success" then color = UI.Theme.Success end
+    if type == "error" then color = UI.Theme.Error end
+    if type == "warn" then color = UI.Theme.Warn end
+    
+    local frame = UI.Create("Frame", {
+        BackgroundColor3 = UI.Theme.Section, Size = UDim2.new(1, 0, 0, 70), Parent = UI.Notifications,
+        BackgroundTransparency = 0.1
+    }, {UI.Corner(8, nil), UI.Create("Frame", {
+        BackgroundColor3 = color, Size = UDim2.new(0, 4, 1, -16), Position = UDim2.new(0, 0, 0, 8)
+    }, {UI.Corner(4)})})
+    
+    UI.Create("TextLabel", {
+        Text = title, Font = UI.Theme.FontBold, TextSize = 14, TextColor3 = UI.Theme.Text,
+        BackgroundTransparency = 1, Position = UDim2.new(0, 15, 0, 8), Size = UDim2.new(1, -20, 0, 20),
+        TextXAlignment = Enum.TextXAlignment.Left, Parent = frame
+    })
+    
+    UI.Create("TextLabel", {
+        Text = content, Font = UI.Theme.Font, TextSize = 12, TextColor3 = UI.Theme.SubText,
+        BackgroundTransparency = 1, Position = UDim2.new(0, 15, 0, 30), Size = UDim2.new(1, -20, 0, 30),
+        TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true, Parent = frame
+    })
+    
+    frame.Position = UDim2.new(1, 100, 0, 0)
+    Services.TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, 0)}):Play()
+    
+    task.delay(duration or 4, function()
+        Services.TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {Position = UDim2.new(1, 100, 0, 0)}):Play()
+        task.wait(0.5)
+        frame:Destroy()
+    end)
 end
 
--- // CORE LOGIC //
-local loading = false
-local BlockFolder = workspace.Blocks:WaitForChild(Player.Name)
+function UI.Window(title, size)
+    local main = UI.Create("Frame", {
+        BackgroundColor3 = UI.Theme.Main, Size = size, Position = UDim2.new(0.5, 0, 0.5, 0),
+        AnchorPoint = Vector2.new(0.5, 0.5), Parent = UI.ScreenGui, ClipsDescendants = true
+    }, {UI.Corner(10), UI.Stroke(1, UI.Theme.Sidebar)})
 
-Load.MouseButton1Click:Connect(function()
-	if loading then 
-		loading = false 
-		Title_6.Text = "Load"
-		return 
-	end
+    local sidebarWidth = 180
+    local padding = 10
+    
+    local progressContainer = UI.Create("Frame", {
+        BackgroundColor3 = UI.Theme.Sidebar, 
+        Size = UDim2.new(1, -(sidebarWidth + (padding * 3)), 0, 6), 
+        Position = UDim2.new(0, sidebarWidth + padding, 1, -15), 
+        Parent = main, Visible = false
+    }, {UI.Corner(3)})
+    
+    local progressFill = UI.Create("Frame", {
+        BackgroundColor3 = UI.Theme.Success, Size = UDim2.new(0, 0, 1, 0), Parent = progressContainer
+    }, {UI.Corner(3)})
+    
+    local progressLabel = UI.Create("TextLabel", {
+        Text = "0%", Font = UI.Theme.FontBold, TextSize = 10, TextColor3 = UI.Theme.SubText,
+        BackgroundTransparency = 1, Position = UDim2.new(0, 0, -2, 0), Size = UDim2.new(1, 0, 0, 10),
+        Parent = progressContainer
+    })
+    
+    UI.ProgressBar = {
+        Container = progressContainer,
+        Fill = progressFill,
+        Label = progressLabel,
+        Update = function(self, percent, status)
+            self.Container.Visible = true
+            percent = math.clamp(percent, 0, 1)
+            Services.TweenService:Create(self.Fill, TweenInfo.new(0.2), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
+            self.Label.Text = (status or "Building...") .. " " .. math.floor(percent * 100) .. "%"
+            if percent >= 1 then
+                task.delay(2, function() self.Container.Visible = false end)
+            end
+        end
+    }
+    
+    local dragging, dragStart, startPos
+    main.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true; dragStart = input.Position; startPos = main.Position
+        end
+    end)
+    Services.UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    Services.UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    end)
+    
+    local sidebar = UI.Create("Frame", {
+        BackgroundColor3 = UI.Theme.Sidebar, Size = UDim2.new(0, sidebarWidth, 1, 0), Parent = main
+    }, {UI.Corner(10)})
+    UI.Create("Frame", { BackgroundColor3 = UI.Theme.Sidebar, Size = UDim2.new(0, 10, 1, 0), Position = UDim2.new(1, -10, 0, 0), BorderSizePixel = 0, Parent = sidebar })
+    
+    UI.Create("TextLabel", {
+        Text = title, Font = UI.Theme.FontBold, TextSize = 18, TextColor3 = UI.Theme.Accent,
+        Size = UDim2.new(1, 0, 0, 50), BackgroundTransparency = 1, Parent = sidebar
+    })
+    
+    local tabContainer = UI.Create("ScrollingFrame", {
+        BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, -60), Position = UDim2.new(0, 0, 0, 60),
+        Parent = sidebar, ScrollBarThickness = 2, BorderSizePixel = 0
+    }, {UI.Create("UIListLayout", {Padding = UDim.new(0, 5), HorizontalAlignment = "Center"})})
+    
+    local contentContainer = UI.Create("Frame", {
+        BackgroundTransparency = 1, Size = UDim2.new(1, -(sidebarWidth + padding), 1, -40), 
+        Position = UDim2.new(0, sidebarWidth + padding, 0, 10), Parent = main
+    })
+    
+    local tabs = {}
+    local currentTab = nil
+    
+    function tabs:Tab(name)
+        local page = UI.Create("ScrollingFrame", {
+            BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Visible = false, Parent = contentContainer,
+            ScrollBarThickness = 4, ScrollBarImageColor3 = UI.Theme.Section, CanvasSize = UDim2.new(0,0,0,0)
+        }, {UI.Create("UIListLayout", {Padding = UDim.new(0, 8), SortOrder = "LayoutOrder"}), UI.Create("UIPadding", {PaddingTop=UDim.new(0,5), PaddingBottom=UDim.new(0,5), PaddingLeft=UDim.new(0,5), PaddingRight=UDim.new(0,10)})})
+        
+        page.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            page.CanvasSize = UDim2.new(0, 0, 0, page.UIListLayout.AbsoluteContentSize.Y + 20)
+        end)
+        
+        local btn = UI.Create("TextButton", {
+            Text = name, Font = UI.Theme.Font, TextSize = 14, TextColor3 = UI.Theme.SubText,
+            BackgroundColor3 = UI.Theme.Main, Size = UDim2.new(0.85, 0, 0, 35), Parent = tabContainer,
+            AutoButtonColor = false
+        }, {UI.Corner(6)})
+        
+        local function active()
+            if currentTab then
+                currentTab.Page.Visible = false
+                Services.TweenService:Create(currentTab.Btn, TweenInfo.new(0.2), {BackgroundColor3 = UI.Theme.Main, TextColor3 = UI.Theme.SubText}):Play()
+            end
+            currentTab = {Page = page, Btn = btn}
+            page.Visible = true
+            Services.TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = UI.Theme.Section, TextColor3 = UI.Theme.Text}):Play()
+        end
+        
+        btn.MouseButton1Click:Connect(active)
+        if not currentTab then active() end
+        
+        local components = {Page = page}
+        
+        function components:Section(text)
+            UI.Create("TextLabel", {
+                Text = text, Font = UI.Theme.FontBold, TextSize = 14, TextColor3 = UI.Theme.Accent,
+                Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 1, TextXAlignment = "Left", Parent = page
+            })
+        end
+        
+        function components:Input(title, placeholder, callback)
+            local f = UI.Create("Frame", {BackgroundColor3 = UI.Theme.Section, Size = UDim2.new(1, 0, 0, 50), Parent = page}, {UI.Corner(6), UI.Stroke(1, UI.Theme.Sidebar)})
+            UI.Create("TextLabel", {
+                Text = title, Font = UI.Theme.Font, TextSize = 12, TextColor3 = UI.Theme.SubText,
+                Position = UDim2.new(0, 10, 0, 5), Size = UDim2.new(1, -20, 0, 20), BackgroundTransparency = 1, TextXAlignment = "Left", Parent = f
+            })
+            local box = UI.Create("TextBox", {
+                Text = "", PlaceholderText = placeholder, Font = UI.Theme.Font, TextSize = 14,
+                TextColor3 = UI.Theme.Text, BackgroundColor3 = UI.Theme.Main, Size = UDim2.new(1, -20, 0, 20),
+                Position = UDim2.new(0, 10, 0, 25), Parent = f, ClearTextOnFocus = false
+            }, {UI.Corner(4)})
+            box.FocusLost:Connect(function() callback(box.Text, box) end)
+            return box
+        end
+        
+        function components:Button(text, color, callback)
+            local btn = UI.Create("TextButton", {
+                Text = text, Font = UI.Theme.FontBold, TextSize = 14, TextColor3 = UI.Theme.Text,
+                BackgroundColor3 = color or UI.Theme.Section, Size = UDim2.new(1, 0, 0, 40), Parent = page,
+                AutoButtonColor = false
+            }, {UI.Corner(6), UI.Stroke(1, UI.Theme.Sidebar)})
+            btn.MouseButton1Click:Connect(callback)
+            return btn
+        end
 
-	loading = true
-	Title_6.Text = "Stop"
+        function components:Toggle(text, default, callback)
+            local toggled = default
+            local btn = UI.Create("TextButton", {
+                Text = "", BackgroundColor3 = UI.Theme.Section, Size = UDim2.new(1, 0, 0, 40), Parent = page,
+                AutoButtonColor = false
+            }, {UI.Corner(6), UI.Stroke(1, UI.Theme.Sidebar)})
+            
+            UI.Create("TextLabel", {
+                Text = text, Font = UI.Theme.Font, TextSize = 14, TextColor3 = UI.Theme.Text,
+                Position = UDim2.new(0, 15, 0, 0), Size = UDim2.new(1, -60, 1, 0), BackgroundTransparency = 1, TextXAlignment = "Left", Parent = btn
+            })
+            
+            local indicator = UI.Create("Frame", {
+                BackgroundColor3 = toggled and UI.Theme.Success or UI.Theme.Main, Size = UDim2.new(0, 24, 0, 24),
+                Position = UDim2.new(1, -35, 0.5, -12), Parent = btn
+            }, {UI.Corner(4), UI.Stroke(1, UI.Theme.Sidebar)})
+            
+            btn.MouseButton1Click:Connect(function()
+                toggled = not toggled
+                indicator.BackgroundColor3 = toggled and UI.Theme.Success or UI.Theme.Main
+                callback(toggled)
+            end)
+            return btn
+        end
+        
+        function components:Slider(title, min, max, default, callback)
+            local val = default
+            local f = UI.Create("Frame", {BackgroundColor3 = UI.Theme.Section, Size = UDim2.new(1, 0, 0, 50), Parent = page}, {UI.Corner(6), UI.Stroke(1, UI.Theme.Sidebar)})
+            local lbl = UI.Create("TextLabel", {Text = title..": "..default, Font=UI.Theme.Font, TextSize=12, TextColor3=UI.Theme.SubText, Position=UDim2.new(0,10,0,5), Size=UDim2.new(1,-20,0,20), BackgroundTransparency=1, TextXAlignment="Left", Parent=f})
+            local bar = UI.Create("Frame", {BackgroundColor3=UI.Theme.Main, Size=UDim2.new(1,-20,0,6), Position=UDim2.new(0,10,0,32), Parent=f}, {UI.Corner(3)})
+            local fill = UI.Create("Frame", {BackgroundColor3=UI.Theme.Accent, Size=UDim2.new((default-min)/(max-min),0,1,0), Parent=bar}, {UI.Corner(3)})
+            local btn = UI.Create("TextButton", {BackgroundTransparency=1, Size=UDim2.new(1,0,1,0), Parent=bar, Text=""})
+            
+            local function update(i)
+                local p = math.clamp((i.Position.X - bar.AbsolutePosition.X)/bar.AbsoluteSize.X, 0, 1)
+                val = math.floor((min + (max-min)*p)*100)/100
+                if string.find(title, "Batch") or string.find(title, "Level") or string.find(title, "Threads") then val = math.floor(val) end
+                Services.TweenService:Create(fill, TweenInfo.new(0.05), {Size=UDim2.new(p,0,1,0)}):Play()
+                lbl.Text = title..": "..val
+                callback(val)
+            end
+            
+            local dragging = false
+            btn.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging=true update(i) end end)
+            Services.UserInputService.InputChanged:Connect(function(i) if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then update(i) end end)
+            Services.UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging=false end end)
+        end
+        
+        return components
+    end
+    return tabs
+end
 
-	if previewpart then previewpart:Destroy() end
-	workspace:WaitForChild("ClearAllPlayersBoatParts"):FireServer()
+-- // 4. IMAGE PROCESSING SYSTEM //
+local ImageEngine = {}
+local JPEG_LIB = loadstring(game:HttpGet("https://raw.githubusercontent.com/HairBaconGamming/Image-Reader-Roblox/refs/heads/main/JPEG/Main.lua"))()
+local PNG_LIB = loadstring(game:HttpGet("https://raw.githubusercontent.com/HairBaconGamming/Image-Reader-Roblox/refs/heads/main/PNG.lua"))()
 
-	local startcframe = currentcframe * CFrame.new((MyPNGdata.PNG.Width * scale)/2, (MyPNGdata.PNG.Height * scale)/2, 0)
+function ImageEngine:Decode(buffer)
+    local success, data = pcall(function() return JPEG_LIB.new(buffer) or PNG_LIB.new(buffer) end)
+    if not success or not data then return nil end
+    
+    local pixels = {}
+    if data["ImageData"] then
+        pixels = data["ImageData"]
+    else
+        for x = 1, data.Width do
+            pixels[x] = {}
+            for y = 1, data.Height do
+                local c, a = PNG_LIB:GetPixel(data, x, y)
+                pixels[x][y] = {c.R*255, c.G*255, c.B*255, a}
+            end
+            if x % 200 == 0 then Services.RunService.Heartbeat:Wait() end
+        end
+    end
+    return {Width = data.Width, Height = data.Height, Data = pixels}
+end
 
-	-- 1. CHUẨN BỊ DỮ LIỆU
-	local pixelQueue = {}
-	for x = 1, MyPNGdata.PNG.Width do
-		for y = 1, MyPNGdata.PNG.Height do
-			local color, alpha = PNG:GetPixel(MyPNGdata.PNG, x, y)
-			if alpha > 0 then
-				local targetCF = startcframe * CFrame.new(x * scale, y * scale, 0):Inverse()
-				table.insert(pixelQueue, { CF = targetCF, Color = color, Pos = targetCF.Position })
-			end
-		end
-	end
+function ImageEngine:Resize(imgData, newW, newH)
+    if not imgData or not imgData.Data then return nil end
+    local newPixels = {}
+    local xRatio = imgData.Width / newW
+    local yRatio = imgData.Height / newH
+    
+    for x = 1, newW do
+        newPixels[x] = {}
+        for y = 1, newH do
+             local oldX = math.floor((x-1)*xRatio) + 1
+             local oldY = math.floor((y-1)*yRatio) + 1
+             if imgData.Data[oldX] and imgData.Data[oldX][oldY] then
+                newPixels[x][y] = imgData.Data[oldX][oldY]
+             else
+                newPixels[x][y] = {0,0,0,0} -- Fallback
+             end
+        end
+        if x % 200 == 0 then Services.RunService.Heartbeat:Wait() end
+    end
+    return {Width = newW, Height = newH, Data = newPixels}
+end
 
-	-- Queue chứa các block cần sơn sau khi xây xong
-	local paintQueue = {} 
+function ImageEngine:Compress(imgData, tolerance)
+    tolerance = tolerance or 10
+    local blocks = {}
+    local visited = {}
+    for x = 1, imgData.Width do visited[x] = {} end
+    
+    for x = 1, imgData.Width do
+        for y = 1, imgData.Height do
+            if visited[x][y] then continue end
+            local p = imgData.Data[x][y]
+            if not p or (p[4] and p[4] == 0) then visited[x][y] = true; continue end
+            if #p == 3 then table.insert(p, 255) end
+            
+            local h = 1
+            while y + h <= imgData.Height do
+                local np = imgData.Data[x][y+h]
+                if not np or #np < 3 or (np[4] and np[4] == 0) then break end
+                
+                if math.abs(np[1]-p[1]) < tolerance and math.abs(np[2]-p[2]) < tolerance and math.abs(np[3]-p[3]) < tolerance then
+                    visited[x][y+h] = true
+                    h = h + 1
+                else break end
+            end
+            table.insert(blocks, {X = x, Y = y, W = 1, H = h, R = p[1], G = p[2], B = p[3]})
+            visited[x][y] = true
+        end
+        -- Speed up compression for stat calculation if called frequently
+        if x % 100 == 0 then Services.RunService.Heartbeat:Wait() end
+    end
+    return blocks
+end
 
-	task.spawn(function()
-		local totalPixels = #pixelQueue
+-- // 5. BUILDER SYSTEM //
+local Builder = {
+    IsBuilding = false,
+    IsPaused = false,
+    GizmoMode = "Move",
+    GizmoActive = false,
+    ActiveGizmos = {},
+    
+    Settings = {
+        Scale = 1.0,
+        BatchSize = 50,
+        Delay = 0.5,
+        MoveStep = 1,
+        RotateStep = 45,
+        CompressLevel = 10,
+        Threads = 1
+    }
+}
 
-		-- ====================================================
-		-- PHASE 1: BUILD & SCALE (Dựng khung hình & Kích thước)
-		-- ====================================================
-		Title_6.Text = "Building..."
+function Builder:GetTool(name)
+    local char = LocalPlayer.Character
+    return (char and char:FindFirstChild(name)) or LocalPlayer.Backpack:FindFirstChild(name)
+end
 
-		for i = 1, totalPixels, BATCH_SIZE do
-			if not loading then break end
-			local currentBatch = {}
-			local batchEnd = math.min(i + BATCH_SIZE - 1, totalPixels)
+function Builder:GetTargetZone()
+    local teamColor = LocalPlayer.TeamColor.Name
+    return Services.Workspace:FindFirstChild(teamColor .. "Zone")
+end
 
-			-- A. Spam Build
-			for j = i, batchEnd do
-				local pixelData = pixelQueue[j]
-				table.insert(currentBatch, pixelData)
-				task.spawn(function() FastBuild(pixelData.CF, myzone) end)
-				RunService.Heartbeat:Wait()
-			end
+function Builder:ClearGizmo()
+    for _, g in pairs(self.ActiveGizmos) do pcall(function() g:Destroy() end) end
+    self.ActiveGizmos = {}
+    self.GizmoActive = false
+end
 
-			-- B. Wait Replication
-			task.wait(REPLICATION_DELAY)
+function Builder:UpdateGizmoState()
+    if not self.GizmoActive then return end
+    local handles = self.ActiveGizmos.Handles
+    local arcHandles = self.ActiveGizmos.ArcHandles
+    
+    if handles and arcHandles then
+        if self.GizmoMode == "Move" then
+            handles.Visible = true
+            arcHandles.Visible = false
+        else
+            handles.Visible = false
+            arcHandles.Visible = true
+        end
+    end
+end
 
-			-- C. Match & Scale
-			local candidates = BlockFolder:GetChildren()
-			for _, pixelData in ipairs(currentBatch) do
-				for _, block in ipairs(candidates) do
-					if block.Name == "PlasticBlock" and not block:FindFirstChild("Processed") then
-						if (block.PPart.Position - pixelData.Pos).Magnitude < 0.1 then
-							-- Đánh dấu
-							local tag = Instance.new("BoolValue", block)
-							tag.Name = "Processed"
+function Builder:Gizmo(part, onUpdateCallback)
+    self:ClearGizmo()
+    self.GizmoActive = true
+    
+    local handles = Instance.new("Handles")
+    handles.Adornee = part
+    handles.Style = Enum.HandlesStyle.Movement
+    handles.Parent = Services.CoreGui
+    
+    local arcHandles = Instance.new("ArcHandles")
+    arcHandles.Adornee = part
+    arcHandles.Parent = Services.CoreGui
+    
+    local box = Instance.new("SelectionBox")
+    box.Adornee = part
+    box.LineThickness = 0.05
+    box.Color3 = UI.Theme.Accent
+    box.Parent = Services.CoreGui
+    
+    self.ActiveGizmos = {Handles = handles, ArcHandles = arcHandles, Box = box}
+    self:UpdateGizmoState()
+    
+    local baseCF = part.CFrame
+    
+    handles.MouseDrag:Connect(function(face, distance)
+        local normal = Vector3.FromNormalId(face)
+        local snap = math.max(0.01, self.Settings.MoveStep)
+        local newDist = Utils.Snap(distance, snap)
+        part.CFrame = baseCF * CFrame.new(normal * newDist)
+        if onUpdateCallback then onUpdateCallback(part) end
+    end)
+    
+    handles.MouseButton1Up:Connect(function() baseCF = part.CFrame end)
+    
+    arcHandles.MouseDrag:Connect(function(axis, angle)
+        local rAxis = Vector3.FromAxis(axis)
+        local snap = math.rad(self.Settings.RotateStep)
+        local newAngle = Utils.Snap(angle, snap)
+        part.CFrame = baseCF * CFrame.Angles(rAxis.X * newAngle, rAxis.Y * newAngle, rAxis.Z * newAngle)
+        if onUpdateCallback then onUpdateCallback(part) end
+    end)
+    
+    arcHandles.MouseButton1Up:Connect(function() baseCF = part.CFrame end)
+    
+    part.Destroying:Connect(function()
+        self:ClearGizmo()
+    end)
+end
 
-							-- SCALE NGAY LẬP TỨC
-							task.spawn(function() FastScale(block, scale, pixelData.CF) end)
+function Builder:Stop()
+    self.IsBuilding = false
+    UI.Notify("Stop", "Building process halted!", "error")
+    UI.ProgressBar.Container.Visible = false
+end
 
-							-- LƯU VÀO HÀNG ĐỢI SƠN (Chưa sơn vội)
-							table.insert(paintQueue, {block, pixelData.Color})
-							break
-						end
-					end
-				end
-				RunService.Heartbeat:Wait()
-			end
-		end
+function Builder:Start(blocks, w, h, originCFrame)
+    if self.IsBuilding then return end
+    self.IsBuilding = true
+    self.IsPaused = false
+    
+    UI.Notify("System", "Starting build (Threads: " .. self.Settings.Threads .. ")", "success")
+    UI.ProgressBar:Update(0, "Preparing...")
+    
+    local scale = self.Settings.Scale
+    local myZone = self:GetTargetZone()
+    
+    if not myZone then
+        UI.Notify("Error", "Zone not found!", "error")
+        self.IsBuilding = false
+        return
+    end
+    
+    local BuildTool = self:GetTool("BuildingTool")
+    
+    if not BuildTool then
+        UI.Notify("Error", "Building Tool required!", "error")
+        self.IsBuilding = false
+        return
+    end
+    
+    local folder = Services.Workspace.Blocks:WaitForChild(LocalPlayer.Name)
+    local startcframe = originCFrame * CFrame.new((w * scale)/2, (h * scale)/2, 0)
+    
+    local pool = {}
+    local poolConnection = folder.ChildAdded:Connect(function(child)
+        if child.Name == "PlasticBlock" then
+            table.insert(pool, child)
+        end
+    end)
+    
+    local GlobalPaintQueue = {}
+    local GlobalMissingQueue = {}
+    
+    local totalBlocks = #blocks
+    local sharedIndex = 1
+    local activeThreads = 0
+    
+    local function worker(threadId)
+        activeThreads = activeThreads + 1
+        local ScaleTool = self:GetTool("ScalingTool")
+        
+        while sharedIndex <= totalBlocks and self.IsBuilding do
+            while self.IsPaused do task.wait(0.5) end
+            if not self.IsBuilding then break end
+            
+            local myStart = sharedIndex
+            local myEnd = math.min(sharedIndex + self.Settings.BatchSize - 1, totalBlocks)
+            sharedIndex = myEnd + 1
+            
+            if myStart > totalBlocks then break end
+            
+            local batch = {}
+            for j = myStart, myEnd do
+                local b = blocks[j]
+                local centerX = b.X + (b.W - 1)/2
+                local centerY = b.Y + (b.H - 1)/2
+                
+                local targetCF = startcframe * CFrame.new(centerX * scale, centerY * scale, 0):Inverse()
+                local targetSize = Vector3.new(b.W * scale, b.H * scale, scale)
+                local targetColor = Color3.fromRGB(b.R, b.G, b.B)
+                
+                table.insert(batch, {CF = targetCF, Size = targetSize, Color = targetColor})
+                
+                local relativeCF = myZone.CFrame:ToObjectSpace(targetCF)
+                local args = {
+                    [1] = "PlasticBlock", [2] = LocalPlayer.Data.PlasticBlock.Value,
+                    [3] = myZone, [4] = relativeCF, [5] = true, [6] = targetCF, [7] = false
+                }
+                BuildTool.RF:InvokeServer(unpack(args))
+            end
+            
+            local retryCount = 0
+            local maxRetries = 30
+            local matchedCount = 0
+            local batchMatched = {}
+            
+            while retryCount < maxRetries and matchedCount < #batch do
+                task.wait(0.15)
+                retryCount = retryCount + 1
+                
+                for i, blockInfo in ipairs(batch) do
+                    if not batchMatched[i] then
+                         for idx, block in ipairs(pool) do
+                            if block and block.Parent and not block:GetAttribute("Claimed") then
+                                local dist = (block.PPart.Position - blockInfo.CF.Position).Magnitude
+                                if dist < 0.8 then
+                                    block:SetAttribute("Claimed", true)
+                                    if ScaleTool then
+                                        ScaleTool.RF:InvokeServer(block, blockInfo.Size, blockInfo.CF)
+                                    end
+                                    table.insert(GlobalPaintQueue, {Block = block, Color = blockInfo.Color, Size = blockInfo.Size, CF = blockInfo.CF})
+                                    batchMatched[i] = true
+                                    matchedCount = matchedCount + 1
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            
+            for i, blockInfo in ipairs(batch) do
+                if not batchMatched[i] then
+                    table.insert(GlobalMissingQueue, blockInfo)
+                end
+            end
+            
+            if threadId == 1 then
+                UI.ProgressBar:Update(math.min(sharedIndex, totalBlocks) / totalBlocks, "Building ("..math.min(sharedIndex, totalBlocks).."/"..totalBlocks..")")
+            end
+            
+            Services.RunService.Heartbeat:Wait()
+        end
+        activeThreads = activeThreads - 1
+    end
+    
+    for t = 1, self.Settings.Threads do
+        task.spawn(function() worker(t) end)
+        task.wait(0.1)
+    end
+    
+    task.spawn(function()
+        while activeThreads > 0 and self.IsBuilding do task.wait(0.5) end
+        
+        if self.IsBuilding then
+            local ScaleTool = self:GetTool("ScalingTool")
+            
+            if #GlobalMissingQueue > 0 then
+                UI.Notify("System", "Repairing missing ("..#GlobalMissingQueue.." blocks)...", "warn")
+                UI.ProgressBar:Update(1, "Repairing missing...")
+                
+                for _, info in ipairs(GlobalMissingQueue) do
+                    if not self.IsBuilding then break end
+                    
+                    local found = false
+                    for _, block in ipairs(folder:GetChildren()) do
+                        if block.Name == "PlasticBlock" and not block:GetAttribute("Claimed") then
+                             local dist = (block.PPart.Position - info.CF.Position).Magnitude
+                             if dist < 0.8 then
+                                block:SetAttribute("Claimed", true)
+                                if ScaleTool then ScaleTool.RF:InvokeServer(block, info.Size, info.CF) end
+                                table.insert(GlobalPaintQueue, {Block = block, Color = info.Color, Size = info.Size, CF = info.CF})
+                                found = true
+                                break
+                             end
+                        end
+                    end
+                    
+                    if not found then
+                        local relativeCF = myZone.CFrame:ToObjectSpace(info.CF)
+                        local args = {
+                            [1] = "PlasticBlock", [2] = LocalPlayer.Data.PlasticBlock.Value,
+                            [3] = myZone, [4] = relativeCF, [5] = true, [6] = info.CF, [7] = false
+                        }
+                        BuildTool.RF:InvokeServer(unpack(args))
+                        local retryBuild = 0
+                        while retryBuild < 10 do 
+                            task.wait(0.1)
+                            for _, block in ipairs(folder:GetChildren()) do
+                                if block.Name == "PlasticBlock" and not block:GetAttribute("Claimed") then
+                                     local dist = (block.PPart.Position - info.CF.Position).Magnitude
+                                     if dist < 0.8 then
+                                        block:SetAttribute("Claimed", true)
+                                        if ScaleTool then ScaleTool.RF:InvokeServer(block, info.Size, info.CF) end
+                                        table.insert(GlobalPaintQueue, {Block = block, Color = info.Color, Size = info.Size, CF = info.CF})
+                                        found = true
+                                        break
+                                     end
+                                end
+                            end
+                            if found then break end
+                            retryBuild = retryBuild + 1
+                        end
+                    end
+                end
+            end
+            
+            if ScaleTool and #GlobalPaintQueue > 0 then
+                UI.Notify("System", "Verifying Scale...", "warn")
+                UI.ProgressBar:Update(1, "Verifying Scale...")
+                local badScaleCount = 0
+                
+                for _, item in ipairs(GlobalPaintQueue) do
+                    if not self.IsBuilding then break end
+                    if item.Block and item.Block.Parent and item.Block:FindFirstChild("PPart") and (item.Block.PPart.Size - item.Size).Magnitude > 0.1 then
+                        badScaleCount = badScaleCount + 1
+                        ScaleTool.RF:InvokeServer(item.Block, item.Size, item.CF)
+                        if badScaleCount % 20 == 0 then Services.RunService.Heartbeat:Wait() end
+                    end
+                end
+                
+                if badScaleCount > 0 then
+                    UI.Notify("Scale Repair", "Fixed " .. badScaleCount .. " misscaled blocks", "success")
+                end
+            end
+            
+            if #GlobalPaintQueue > 0 then
+                UI.Notify("System", "Painting ("..#GlobalPaintQueue.." blocks)...", "warn")
+                UI.ProgressBar:Update(1, "Painting...")
+                
+                local PaintTool = self:GetTool("PaintingTool")
+                if PaintTool then
+                    local chunkSize = 100
+                    for i = 1, #GlobalPaintQueue, chunkSize do
+                        if not self.IsBuilding then break end
+                        local chunk = {}
+                        for j = i, math.min(i + chunkSize - 1, #GlobalPaintQueue) do
+                            local item = GlobalPaintQueue[j]
+                            if item.Block and item.Block.Parent then
+                                table.insert(chunk, {item.Block, item.Color})
+                            end
+                        end
+                        if #chunk > 0 then
+                            PaintTool.RF:InvokeServer(chunk)
+                        end
+                        Services.RunService.Heartbeat:Wait()
+                    end
+                end
+            end
+            
+            poolConnection:Disconnect()
+            self.IsBuilding = false
+            UI.ProgressBar:Update(1, "Done!")
+            UI.Notify("Finished", "Build Complete!", "success")
+        else
+            poolConnection:Disconnect()
+        end
+    end)
+end
 
-		task.wait(REPLICATION_DELAY)
+-- // 6. APP LOGIC //
+local App = {
+    Data = { Raw = nil, Pixels = nil, OriginalPixels = nil, Blocks = nil },
+    PreviewPart = nil,
+    LastPos = nil,
+    LastRot = nil,
+    LockRatio = true
+}
 
-		FastPaintBatched(paintQueue)
+local UI_Refs = {
+    PosX = nil, PosY = nil, PosZ = nil,
+    RotX = nil, RotY = nil, RotZ = nil,
+    ModeBtn = nil,
+    PauseBtn = nil,
+    WidthInput = nil, HeightInput = nil,
+    StatBlocks = nil, StatCost = nil
+}
 
-		-- FINISH
-		loading = false
-		Title_6.Text = "Load"
-		for _, v in pairs(BlockFolder:GetChildren()) do
-			if v:FindFirstChild("Processed") then v.Processed:Destroy() end
-		end
-	end)
+function App:GetBlockCount()
+    if LocalPlayer and LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("PlasticBlock") then
+        return LocalPlayer.Data.PlasticBlock.Value
+    end
+    return 0
+end
+
+-- Auto update Available count
+task.spawn(function()
+    while true do
+        if UI_Refs.StatBlocks then
+            UI_Refs.StatBlocks.Text = "Available: " .. App:GetBlockCount()
+        end
+        task.wait(0.5)
+    end
 end)
 
-local connect
-connect = game:GetService("RunService").Heartbeat:Connect(function()
-	if not ImageLoader or ImageLoader == nil then
-		connect:Disconnect()
-		return
-	end
-	if previewpart then
-		previewpart.Size = Vector3.new(MyPNGdata.PNG.Width*scale,MyPNGdata.PNG.Height*scale,scale)
-		currentcframe = previewpart.CFrame
-		TitlePos.Text = "Position: ".. math.round(previewpart.Position.X)..","..math.round(previewpart.Position.Y)..","..math.round(previewpart.Position.Z)
-		TitleOrientation.Text = "Orientation".. math.round(previewpart.Orientation.X)..","..math.round(previewpart.Orientation.Y)..","..math.round(previewpart.Orientation.Z)
-	end
-	Main.CanvasSize = UDim2.fromOffset(0,UIListLayout_3.AbsoluteContentSize.Y)
-end)
-ImageLoader.Destroying:Connect(function()
-	if previewpart then
-		previewpart:Destroy()
-	end 
-	connect:Disconnect()
+function App:UpdateStats()
+    -- Calculate estimated cost based on compression
+    if self.Data.Pixels then
+        UI_Refs.StatCost.Text = "Estimating Cost..."
+        
+        -- Run compression in background to avoid lag
+        task.spawn(function()
+            local tempBlocks = ImageEngine:Compress(self.Data.Pixels, Builder.Settings.CompressLevel)
+            if UI_Refs.StatCost then
+                UI_Refs.StatCost.Text = "Estimated Cost: " .. #tempBlocks .. " blocks"
+            end
+        end)
+    else
+        UI_Refs.StatCost.Text = "Estimated Cost: 0"
+    end
+end
+
+function App:LoadImage(url)
+    UI.Notify("Download", "Fetching...", "warn")
+    local s, res = pcall(function() return game:HttpGet(url) end)
+    if not s then return UI.Notify("Error", "Bad Link", "error") end
+    
+    self.Data.Raw = res
+    local fileName = "ImageLoaderBabft/preview_" .. math.random(100000, 999999) .. ".png"
+    
+    if listfiles then
+        for _, file in ipairs(listfiles("ImageLoaderBabft")) do
+            if string.find(file, "preview_") then delfile(file) end
+        end
+    end
+    
+    writefile(fileName, res)
+    local decoded = ImageEngine:Decode(res)
+    if decoded then
+        self.Data.Pixels = decoded
+        self.Data.OriginalPixels = decoded 
+        
+        UI.Notify("Success", decoded.Width.."x"..decoded.Height, "success")
+        
+        if UI_Refs.WidthInput then UI_Refs.WidthInput.Text = tostring(decoded.Width) end
+        if UI_Refs.HeightInput then UI_Refs.HeightInput.Text = tostring(decoded.Height) end
+        
+        self:UpdateStats()
+        return fileName
+    end
+end
+
+function App:ResizeImage()
+    if not self.Data.OriginalPixels then return UI.Notify("Error", "No image to resize", "error") end
+    
+    local w = tonumber(UI_Refs.WidthInput.Text)
+    local h = tonumber(UI_Refs.HeightInput.Text)
+    
+    if not w or not h then return UI.Notify("Error", "Invalid Resolution", "error") end
+    
+    UI.Notify("Resize", "Resizing to "..w.."x"..h.."...", "warn")
+    local newPixels = ImageEngine:Resize(self.Data.OriginalPixels, w, h)
+    
+    if newPixels then
+        self.Data.Pixels = newPixels
+        UI.Notify("Success", "Resized!", "success")
+        self:UpdateStats()
+        if self.PreviewPart then self:Preview() end
+    end
+end
+
+function App:UpdateUIFromPart(part)
+    if not part then return end
+    local p = part.Position
+    local r = part.Orientation
+    self.LastPos = p
+    self.LastRot = r
+    
+    if UI_Refs.PosX then UI_Refs.PosX.Text = string.format("%.1f", p.X) end
+    if UI_Refs.PosY then UI_Refs.PosY.Text = string.format("%.1f", p.Y) end
+    if UI_Refs.PosZ then UI_Refs.PosZ.Text = string.format("%.1f", p.Z) end
+    
+    if UI_Refs.RotX then UI_Refs.RotX.Text = string.format("%.0f", r.X) end
+    if UI_Refs.RotY then UI_Refs.RotY.Text = string.format("%.0f", r.Y) end
+    if UI_Refs.RotZ then UI_Refs.RotZ.Text = string.format("%.0f", r.Z) end
+end
+
+function App:UpdatePartFromUI()
+    if not self.PreviewPart then return end
+    
+    local x = tonumber(UI_Refs.PosX.Text) or self.PreviewPart.Position.X
+    local y = tonumber(UI_Refs.PosY.Text) or self.PreviewPart.Position.Y
+    local z = tonumber(UI_Refs.PosZ.Text) or self.PreviewPart.Position.Z
+    
+    local rx = tonumber(UI_Refs.RotX.Text) or self.PreviewPart.Orientation.X
+    local ry = tonumber(UI_Refs.RotY.Text) or self.PreviewPart.Orientation.Y
+    local rz = tonumber(UI_Refs.RotZ.Text) or self.PreviewPart.Orientation.Z
+    
+    self.PreviewPart.CFrame = CFrame.new(x, y, z) * CFrame.Angles(math.rad(rx), math.rad(ry), math.rad(rz))
+    self.LastPos = Vector3.new(x, y, z)
+    self.LastRot = Vector3.new(rx, ry, rz)
+end
+
+function App:ToggleMode()
+    Builder.GizmoMode = (Builder.GizmoMode == "Move") and "Rotate" or "Move"
+    Builder:UpdateGizmoState()
+    if UI_Refs.ModeBtn then UI_Refs.ModeBtn.Text = "Mode: " .. Builder.GizmoMode .. " (F)" end
+end
+
+function App:CancelPreview()
+    if self.PreviewPart then
+        self.PreviewPart:Destroy()
+        self.PreviewPart = nil
+        Builder:ClearGizmo()
+        UI.Notify("Preview", "Preview Cancelled", "warn", 2)
+    end
+end
+
+function App:Preview()
+    if self.PreviewPart then
+        self:CancelPreview()
+    end
+    
+    if not self.Data.Pixels then return end
+    local w, h = self.Data.Pixels.Width, self.Data.Pixels.Height
+    local s = Builder.Settings.Scale
+    
+    local p = Instance.new("Part")
+    p.Name = "TitaniumPreview"
+    p.Anchored = true; p.CanCollide = false; p.Transparency = 0.5; p.Material = Enum.Material.Neon
+    p.Size = Vector3.new(w*s, h*s, s)
+    
+    if self.LastPos and self.LastRot then
+        p.CFrame = CFrame.new(self.LastPos) * CFrame.Angles(math.rad(self.LastRot.X), math.rad(self.LastRot.Y), math.rad(self.LastRot.Z))
+    else
+        p.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 10, -10)
+    end
+    
+    p.Parent = Services.Workspace
+    self.PreviewPart = p
+    Builder:Gizmo(p, function(updatedPart)
+        self:UpdateUIFromPart(updatedPart)
+    end)
+    
+    self:UpdateUIFromPart(p)
+    UI.Notify("Preview", "Press X to Cancel", "success")
+end
+
+-- // 7. UI INITIALIZATION //
+UI.Init()
+local Window = UI.Window("BABFT Loader v5.5.2", UDim2.new(0, 750, 0, 500))
+local TabHome = Window:Tab("Dashboard")
+
+TabHome:Section("Image Source")
+local PreviewBox = UI.Create("ImageLabel", {
+    BackgroundColor3 = Color3.new(0,0,0), BackgroundTransparency = 0.5,
+    Size = UDim2.new(1, 0, 0, 180), ScaleType = Enum.ScaleType.Fit,
+    Image = "rbxasset://textures/ui/GuiImagePlaceholder.png", Parent = TabHome.Page
+}, {UI.Corner(8)})
+
+local UrlInput = TabHome:Input("Image Link", "https://...", function() end)
+
+local BtnRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,40), Parent=TabHome.Page})
+local LoadBtn = UI.Create("TextButton", {
+    Text="Load", BackgroundColor3=UI.Theme.Accent, TextColor3=UI.Theme.Text, Size=UDim2.new(0.3,0,1,0),
+    Font=UI.Theme.FontBold, TextSize=14, Parent=BtnRow
+}, {UI.Corner(6)})
+
+local PreviewBtn = UI.Create("TextButton", {
+    Text="Preview", BackgroundColor3=UI.Theme.Section, TextColor3=UI.Theme.Text, Size=UDim2.new(0.22,0,1,0),
+    Position=UDim2.new(0.32,0,0,0), Font=UI.Theme.FontBold, TextSize=14, Parent=BtnRow
+}, {UI.Corner(6)})
+
+local CancelBtn = UI.Create("TextButton", {
+    Text="Cancel (X)", BackgroundColor3=UI.Theme.Error, TextColor3=UI.Theme.Text, Size=UDim2.new(0.22,0,1,0),
+    Position=UDim2.new(0.56,0,0,0), Font=UI.Theme.FontBold, TextSize=14, Parent=BtnRow
+}, {UI.Corner(6)})
+
+local BuildBtn = UI.Create("TextButton", {
+    Text="BUILD", BackgroundColor3=UI.Theme.Success, TextColor3=UI.Theme.Text, Size=UDim2.new(0.2,0,1,0),
+    Position=UDim2.new(0.8,0,0,0), Font=UI.Theme.FontBold, TextSize=14, Parent=BtnRow
+}, {UI.Corner(6)})
+
+-- Resize Section
+TabHome:Section("Resize Image")
+local ResizeRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,40), Parent=TabHome.Page})
+UI_Refs.WidthInput = UI.Create("TextBox", {
+    Text="", PlaceholderText="W", BackgroundColor3=UI.Theme.Section, TextColor3=UI.Theme.Text,
+    Size=UDim2.new(0.2,0,1,0), Font=UI.Theme.Font, TextSize=14, Parent=ResizeRow
+}, {UI.Corner(6)})
+UI_Refs.HeightInput = UI.Create("TextBox", {
+    Text="", PlaceholderText="H", BackgroundColor3=UI.Theme.Section, TextColor3=UI.Theme.Text,
+    Size=UDim2.new(0.2,0,1,0), Position=UDim2.new(0.22,0,0,0), Font=UI.Theme.Font, TextSize=14, Parent=ResizeRow
+}, {UI.Corner(6)})
+
+local LockRatioBtn = UI.Create("TextButton", {
+    Text="Lock Ratio", BackgroundColor3=UI.Theme.Success, TextColor3=UI.Theme.Text,
+    Size=UDim2.new(0.25,0,1,0), Position=UDim2.new(0.44,0,0,0), Font=UI.Theme.Font, TextSize=12, Parent=ResizeRow
+}, {UI.Corner(6)})
+
+local ApplyResizeBtn = UI.Create("TextButton", {
+    Text="Apply Resize", BackgroundColor3=UI.Theme.Accent, TextColor3=UI.Theme.Text,
+    Size=UDim2.new(0.29,0,1,0), Position=UDim2.new(0.71,0,0,0), Font=UI.Theme.FontBold, TextSize=12, Parent=ResizeRow
+}, {UI.Corner(6)})
+
+-- Resize Logic
+UI_Refs.WidthInput.FocusLost:Connect(function()
+    if App.LockRatio and App.Data.OriginalPixels then
+        local w = tonumber(UI_Refs.WidthInput.Text)
+        if w then
+            local ratio = App.Data.OriginalPixels.Height / App.Data.OriginalPixels.Width
+            UI_Refs.HeightInput.Text = tostring(math.floor(w * ratio))
+        end
+    end
 end)
 
-Ratio.Visible = false
-Minimize.Visible = false
+LockRatioBtn.MouseButton1Click:Connect(function()
+    App.LockRatio = not App.LockRatio
+    LockRatioBtn.BackgroundColor3 = App.LockRatio and UI.Theme.Success or UI.Theme.Section
+end)
+
+ApplyResizeBtn.MouseButton1Click:Connect(function() App:ResizeImage() end)
+
+-- Stats Section
+TabHome:Section("Block Stats")
+local StatsRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,30), Parent=TabHome.Page})
+UI_Refs.StatBlocks = UI.Create("TextLabel", {
+    Text="Available: 0", TextColor3=UI.Theme.Success, BackgroundTransparency=1,
+    Size=UDim2.new(0.5,0,1,0), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
+})
+UI_Refs.StatCost = UI.Create("TextLabel", {
+    Text="Estimated Cost: 0", TextColor3=UI.Theme.Warn, BackgroundTransparency=1,
+    Size=UDim2.new(0.5,0,1,0), Position=UDim2.new(0.5,0,0,0), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
+})
+
+-- Controls Section
+TabHome:Section("Preview Controls")
+UI_Refs.ModeBtn = TabHome:Button("Mode: Move (F)", UI.Theme.Warn, function() App:ToggleMode() end)
+
+local ControlRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,40), Parent=TabHome.Page})
+local PauseBtn = UI.Create("TextButton", {
+    Text="Pause", BackgroundColor3=UI.Theme.Warn, TextColor3=UI.Theme.Text, Size=UDim2.new(0.48,0,1,0),
+    Font=UI.Theme.FontBold, TextSize=14, Parent=ControlRow
+}, {UI.Corner(6)})
+
+local StopBtn = UI.Create("TextButton", {
+    Text="Stop", BackgroundColor3=UI.Theme.Error, TextColor3=UI.Theme.Text, Size=UDim2.new(0.48,0,1,0),
+    Position=UDim2.new(0.52,0,0,0), Font=UI.Theme.FontBold, TextSize=14, Parent=ControlRow
+}, {UI.Corner(6)})
+
+UI_Refs.PauseBtn = PauseBtn
+
+PauseBtn.MouseButton1Click:Connect(function()
+    Builder.IsPaused = not Builder.IsPaused
+    if Builder.IsPaused then
+        PauseBtn.Text = "Resume"
+        PauseBtn.BackgroundColor3 = UI.Theme.Success
+    else
+        PauseBtn.Text = "Pause"
+        PauseBtn.BackgroundColor3 = UI.Theme.Warn
+    end
+end)
+
+StopBtn.MouseButton1Click:Connect(function()
+    Builder:Stop()
+    PauseBtn.Text = "Pause"
+    PauseBtn.BackgroundColor3 = UI.Theme.Warn
+end)
+
+-- Handlers
+LoadBtn.MouseButton1Click:Connect(function()
+    local p = App:LoadImage(UrlInput.Text)
+    if p then 
+        PreviewBox.Image = ""
+        task.wait(0.1)
+        PreviewBox.Image = getcustomasset(p) 
+    end
+end)
+
+PreviewBtn.MouseButton1Click:Connect(function() App:Preview() end)
+CancelBtn.MouseButton1Click:Connect(function() App:CancelPreview() end)
+
+BuildBtn.MouseButton1Click:Connect(function()
+    if not App.Data.Pixels then return UI.Notify("Error", "No image loaded!", "error") end
+    
+    Builder.IsPaused = false
+    PauseBtn.Text = "Pause"
+    PauseBtn.BackgroundColor3 = UI.Theme.Warn
+
+    local originCF
+    if App.PreviewPart then
+        originCF = App.PreviewPart.CFrame
+        App.LastPos = originCF.Position
+        App.LastRot = originCF.Orientation
+    elseif App.LastPos and App.LastRot then
+        originCF = CFrame.new(App.LastPos) * CFrame.Angles(math.rad(App.LastRot.X), math.rad(App.LastRot.Y), math.rad(App.LastRot.Z))
+    else
+        local x = tonumber(UI_Refs.PosX.Text)
+        local y = tonumber(UI_Refs.PosY.Text)
+        local z = tonumber(UI_Refs.PosZ.Text)
+        if x and y and z then
+            local rx = tonumber(UI_Refs.RotX.Text) or 0
+            local ry = tonumber(UI_Refs.RotY.Text) or 0
+            local rz = tonumber(UI_Refs.RotZ.Text) or 0
+            originCF = CFrame.new(x, y, z) * CFrame.Angles(math.rad(rx), math.rad(ry), math.rad(rz))
+        else
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                originCF = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, -10)
+                UI.Notify("Info", "Using player position", "warn")
+                App:UpdateUIFromPart({Position = originCF.Position, Orientation = Vector3.new(0,0,0)})
+            else
+                return UI.Notify("Error", "Player not found!", "error")
+            end
+        end
+    end
+    
+    local blocks = ImageEngine:Compress(App.Data.Pixels, Builder.Settings.CompressLevel)
+    Builder:Start(blocks, App.Data.Pixels.Width, App.Data.Pixels.Height, originCF)
+end)
+
+local StepRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,50), Parent=TabHome.Page})
+local MoveStepBox = UI.Create("Frame", {BackgroundColor3=UI.Theme.Section, Size=UDim2.new(0.48,0,1,0), Parent=StepRow}, {UI.Corner(6)})
+UI.Create("TextLabel", {Text="Move Step", TextColor3=UI.Theme.SubText, Position=UDim2.new(0,10,0,5), Size=UDim2.new(1,0,0,20), BackgroundTransparency=1, TextXAlignment="Left", Parent=MoveStepBox})
+local MSInput = UI.Create("TextBox", {Text="1", TextColor3=UI.Theme.Text, BackgroundTransparency=1, Position=UDim2.new(0,10,0,25), Size=UDim2.new(1,-20,0,20), TextXAlignment="Left", Parent=MoveStepBox})
+MSInput.FocusLost:Connect(function() Builder.Settings.MoveStep = tonumber(MSInput.Text) or 1 end)
+
+local RotStepBox = UI.Create("Frame", {BackgroundColor3=UI.Theme.Section, Size=UDim2.new(0.48,0,1,0), Position=UDim2.new(0.52,0,0,0), Parent=StepRow}, {UI.Corner(6)})
+UI.Create("TextLabel", {Text="Rotate Step", TextColor3=UI.Theme.SubText, Position=UDim2.new(0,10,0,5), Size=UDim2.new(1,0,0,20), BackgroundTransparency=1, TextXAlignment="Left", Parent=RotStepBox})
+local RSInput = UI.Create("TextBox", {Text="45", TextColor3=UI.Theme.Text, BackgroundTransparency=1, Position=UDim2.new(0,10,0,25), Size=UDim2.new(1,-20,0,20), TextXAlignment="Left", Parent=RotStepBox})
+RSInput.FocusLost:Connect(function() Builder.Settings.RotateStep = tonumber(RSInput.Text) or 45 end)
+
+TabHome:Section("Coordinates (X, Y, Z)")
+local PosGrid = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,40), Parent=TabHome.Page})
+local function makeMiniInput(parent, placeholder, pos)
+    local bg = UI.Create("Frame", {BackgroundColor3=UI.Theme.Section, Size=UDim2.new(0.3,0,1,0), Position=pos, Parent=parent}, {UI.Corner(4)})
+    return UI.Create("TextBox", {PlaceholderText=placeholder, Text="", TextColor3=UI.Theme.Text, BackgroundTransparency=1, Size=UDim2.new(1,0,1,0), TextXAlignment="Center", Parent=bg})
+end
+
+UI_Refs.PosX = makeMiniInput(PosGrid, "X", UDim2.new(0,0,0,0))
+UI_Refs.PosY = makeMiniInput(PosGrid, "Y", UDim2.new(0.35,0,0,0))
+UI_Refs.PosZ = makeMiniInput(PosGrid, "Z", UDim2.new(0.7,0,0,0))
+
+for _, inp in pairs({UI_Refs.PosX, UI_Refs.PosY, UI_Refs.PosZ}) do
+    inp.FocusLost:Connect(function() App:UpdatePartFromUI() end)
+end
+
+TabHome:Section("Rotation (X, Y, Z)")
+local RotGrid = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,40), Parent=TabHome.Page})
+UI_Refs.RotX = makeMiniInput(RotGrid, "RX", UDim2.new(0,0,0,0))
+UI_Refs.RotY = makeMiniInput(RotGrid, "RY", UDim2.new(0.35,0,0,0))
+UI_Refs.RotZ = makeMiniInput(RotGrid, "RZ", UDim2.new(0.7,0,0,0))
+
+for _, inp in pairs({UI_Refs.RotX, UI_Refs.RotY, UI_Refs.RotZ}) do
+    inp.FocusLost:Connect(function() App:UpdatePartFromUI() end)
+end
+
+local TabConfig = Window:Tab("Settings")
+
+TabConfig:Slider("Parallel Threads", 1, 20, 1, function(v)
+    Builder.Settings.Threads = v
+end)
+
+-- Update stats when compress level changes
+TabConfig:Slider("Compress Level", 0, 50, 10, function(v)
+    Builder.Settings.CompressLevel = v
+    if App.Data.Pixels then App:UpdateStats() end
+end)
+
+TabConfig:Slider("Scale", 0.05, 2.0, 1.0, function(v) 
+    Builder.Settings.Scale = v
+    if App.PreviewPart and App.Data.Pixels then
+        local w, h = App.Data.Pixels.Width, App.Data.Pixels.Height
+        App.PreviewPart.Size = Vector3.new(w*v, h*v, v)
+    end
+end)
+
+TabConfig:Slider("Delay (s)", 0.1, 2.0, 0.5, function(v) Builder.Settings.Delay = v end)
+TabConfig:Slider("Batch Size", 10, 100, 50, function(v) Builder.Settings.BatchSize = math.floor(v) end)
+
+Services.UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.X then
+        App:CancelPreview()
+    elseif input.KeyCode == Enum.KeyCode.F and Builder.GizmoActive then
+        App:ToggleMode()
+    end
+end)
+
+UI.Notify("Titanium", "v5.5.2 Loaded", "success", 5)
