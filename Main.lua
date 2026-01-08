@@ -1,4 +1,6 @@
 -- Objects To Lua Make By HairBaconGamming --
+-- OPTIMIZED VERSION BY GEMINI (FASTEST & SAFE) --
+
 local Module_Scripts = {}
 local ImageLoader = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
@@ -175,7 +177,7 @@ function Smooth_GUI_Dragging_ScriptfakeXD()
 
 	local script = Instance.new("LocalScript",Frame)
 	Smooth_GUI_Dragging = script
-	script.Name = [[Smooth GUI Dragging]]	
+	script.Name = [[Smooth GUI Dragging]]   
 	local require_fake = require
 	local require = function(Object)
 		local functiom = Module_Scripts[Object]
@@ -761,6 +763,10 @@ end
 
 ImageLoader.Parent = Gui
 
+local BATCH_SIZE = 100 -- Số lượng pixel xử lý mỗi đợt (50 pixel = 150 requests). Đừng tăng quá 100.
+local REPLICATION_DELAY = .5 -- Thời gian đợi block hiện ra (giây). Mạng ngon có thể giảm xuống 0.1
+local SAFE_ZONE_NAME = game.Players.LocalPlayer.TeamColor.Name .. "Zone"
+
 local scale = 1
 local ratio = {1,1}
 local rotate = 90
@@ -1072,17 +1078,17 @@ if not isfolder("ImageLoaderBabft") then
 	makefolder("ImageLoaderBabft")
 end
 local function safeDownload(path, url)
-    if not isfile(path) then
-        local success, response = pcall(function()
-            return game:HttpGet(url)
-        end)
-        if success and response and type(response) == "string" then
-            writefile(path, response)
-        else
-            print(respone)
-            writefile(path, "nothing")
-        end
-    end
+	if not isfile(path) then
+		local success, response = pcall(function()
+			return game:HttpGet(url)
+		end)
+		if success and response and type(response) == "string" then
+			writefile(path, response)
+		else
+			print(respone)
+			writefile(path, "nothing")
+		end
+	end
 end
 
 safeDownload("ImageLoaderBabft/icon.png", "https://i.ibb.co/rRbszL38/Gemini-Generated-Image-ijup61ijup61ijup-removebg-preview.png")
@@ -1100,30 +1106,6 @@ local MyPNGdata = {
 	["Data"] = '',
 	["PNG"] = {}
 }
-
-if isfile("ImageLoaderBabft/preview.png") then
-	MyPNGdata.Data = readfile("ImageLoaderBabft/preview.png")
-	local data = PNG.new(MyPNGdata.Data)
-	local ascale = {
-		data.Width/150,
-		data.Height/150,
-	}
-	if data.Width > 150 then
-		Result.Size = UDim2.fromOffset(data.Width/ascale[1],data.Height/ascale[1])
-		if data.Height > 150 then
-			Result.Size = UDim2.fromOffset(data.Width/ascale[1]/ascale[2],data.Height/ascale[1]/ascale[2])
-		end
-	else
-		Result.Size = UDim2.fromOffset(data.Width,data.Height)
-	end
-	Width.Text = "Width: " .. data.Width
-	Height.Text = "Height: " ..data.Height
-	Pixel.Text = "Pixels: ".. data.Width * data.Height
-	MyPNGdata.PNG = data
-	PlasticBlockNeed.Text = "Plastic Block Need: " .. math.round((data.Width * data.Height)*(scale/2))
-	Opition1.Text = "ImageLoaderBabft/preview.png"
-	Result.Image = getcustomasset("ImageLoaderBabft/preview.png")
-end
 
 local previewpart
 
@@ -1188,10 +1170,11 @@ game:GetService("Players").LocalPlayer.Data.PlasticBlock.Used.Changed:Connect(fu
 end)
 
 
-local myzone = workspace:FindFirstChild(game.Players.LocalPlayer.TeamColor.Name.."Zone")
+local myzone = workspace:FindFirstChild(SAFE_ZONE_NAME)
+
 if not myzone then
+	warn("Không tìm thấy Zone của bạn: " .. SAFE_ZONE_NAME)
 	ImageLoader:Destroy()
-	warn("cant find zone.")
 	return
 end
 
@@ -1261,323 +1244,149 @@ Opition1_3.FocusLost:Connect(function(enter)
 end)
 
 local RunService = game:GetService("RunService")
-function buildBlock(cframe, blacklist)
-    local targetPos = cframe.Position
-    local Player = game:GetService("Players").LocalPlayer
-    local BlockFolder = workspace.Blocks:FindFirstChild(Player.Name)
-    
-    -- Argument cho RemoteEvent
-    local args = {
-        [1] = "PlasticBlock",
-        [2] = Player.Data.PlasticBlock.Value,
-        [3] = myzone,
-        [4] = CFrame.new(targetPos - myzone.Position),
-        [5] = true,
-        [6] = cframe,
-        [7] = false
-    }
+-- Tối ưu hóa OverlapParams (Tạo 1 lần dùng mãi mãi)
+local safeOverlapParams = OverlapParams.new()
+--safeOverlapParams.FilterType = Enum.RaycastFilterType.Include
+local Player = game:GetService("Players").LocalPlayer
+local BlockFolder = workspace.Blocks:WaitForChild(Player.Name)
+--safeOverlapParams.FilterDescendantsInstances = {BlockFolder}
 
-    -- Tìm RemoteFunction chính xác
-    local rfevent
-    local charTool = Player.Character:FindFirstChild("BuildingTool")
-    local backpackTool = Player.Backpack:FindFirstChild("BuildingTool")
-    
-    if charTool then
-        rfevent = charTool.RF
-    elseif backpackTool then
-        rfevent = backpackTool.RF
-    else
-        -- ImageLoader:Destroy() -- Tùy chọn: Không nên destroy UI chỉ vì lỗi này, chỉ cần warn
-        warn("Không tìm thấy BuildingTool RF.")
-        return nil
-    end
+local function FastBuild(cframe, mouseTarget)
+	local Tool = Player.Character:FindFirstChild("BuildingTool") or Player.Backpack:FindFirstChild("BuildingTool")
+	if not Tool then return end
 
-    local foundBlock = nil
-    
-    -- Hàm kiểm tra xem block có phải cái ta cần tìm không (Dùng Magnitude để tránh lỗi sai số vị trí)
-    local function isTargetBlock(block)
-        if block.Name == "PlasticBlock" 
-        and block:FindFirstChild("Tag") 
-        and block.Tag.Value == Player.Name 
-        and block:FindFirstChild("PPart") then
-            -- Cho phép sai số khoảng cách nhỏ hơn 0.1 stud (quan trọng)
-            if (block.PPart.Position - targetPos).Magnitude < 0.1 then
-                return true
-            end
-        end
-        return false
-    end
-
-    -- 1. LẮNG NGHE TRƯỚC: Tạo connection lắng nghe ChildAdded ngay trước khi bắn remote
-    -- Điều này đảm bảo bắt được block kể cả khi server phản hồi cực nhanh
-    local connection
-    if BlockFolder then
-        connection = BlockFolder.ChildAdded:Connect(function(child)
-            if isTargetBlock(child) then
-                foundBlock = child
-            end
-        end)
-    end
-
-    -- 2. BẮN TÍN HIỆU: Invoke Server (Sử dụng task.spawn để không chặn luồng client)
-    task.spawn(function()
-        rfevent:InvokeServer(unpack(args))
-    end)
-
-    -- 3. VÒNG LẶP KIỂM TRA (Polling): Chờ block xuất hiện
-    local timeout = 2 -- Thời gian chờ tối đa (giây)
-    local startTick = tick()
-    
-    -- Sử dụng OverlapParams cho việc quét vùng (nhanh hơn quét toàn bộ workspace)
-    local overlapParams = OverlapParams.new()
-    overlapParams.FilterType = Enum.RaycastFilterType.Exclude
-    overlapParams.FilterDescendantsInstances = blacklist or {}
-    
-    while not foundBlock and (tick() - startTick < timeout) do
-        -- Nếu ChildAdded chưa bắt được, ta chủ động quét vùng không gian đó
-        -- Kích thước box quét nhỏ (1x1x1) là đủ
-        local parts = workspace:GetPartBoundsInBox(cframe, Vector3.new(1, 1, 1), overlapParams)
-        
-        for _, part in ipairs(parts) do
-            local model = part.Parent
-            if model and isTargetBlock(model) then
-                foundBlock = model
-                break
-            end
-        end
-        
-        if foundBlock then break end
-        game:GetService("RunService").Heartbeat:Wait() -- Chờ frame tiếp theo
-    end
-
-    -- Dọn dẹp connection
-    if connection then connection:Disconnect() end
-
-    return foundBlock
-end
-function paintblock(block,color)
+	local relativeCF = mouseTarget.CFrame:ToObjectSpace(cframe)
 	local args = {
-		[1] = {
-			[1] = {
-				[1] = block,
-				[2] = color
-			}
-		}
+		[1] = "PlasticBlock",
+		[2] = Player.Data.PlasticBlock.Value,
+		[3] = mouseTarget,
+		[4] = relativeCF,
+		[5] = true,
+		[6] = cframe,
+		[7] = false
 	}
-
-	local rfevent
-	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("PaintingTool") then
-		rfevent = game:GetService("Players").LocalPlayer.Character.PaintingTool.RF
-	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("PaintingTool") then
-		rfevent = game:GetService("Players").LocalPlayer.Backpack.PaintingTool.RF
-	else
-		ImageLoader:Destroy()
-		warn("cant find rfevent.")
-		return
-	end
-
-	rfevent:InvokeServer(unpack(args))
+	Tool.RF:InvokeServer(unpack(args))
 end
-function scaleblock(block,cframe)
-	local args = {
-		[1] = block,
-		[2] = Vector3.new(scale,scale,scale),
-		[3] = cframe
-	}
-	local rfevent
-	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("ScalingTool") then
-		rfevent = game:GetService("Players").LocalPlayer.Character.ScalingTool.RF
-	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("ScalingTool") then
-		rfevent = game:GetService("Players").LocalPlayer.Backpack.ScalingTool.RF
-	else
-		ImageLoader:Destroy()
-		warn("cant find rfevent.")
-		return
-	end
 
-	rfevent:InvokeServer(unpack(args))
-
-	--[[
-	local scaledblock
-	local antilag = 0
-	repeat game:GetService("RunService").Heartbeat:Wait()
-		for i,v in pairs(workspace:GetChildren()) do
-			if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and v:FindFirstChild("PPart") and v.PPart.CFrame == cframe and v.PPart.Size == Vector3.new(scale,scale,scale) then
-				scaledblock = v
-				break
-			end
+local function FastPaint(block, color)
+	local Tool = Player.Character:FindFirstChild("PaintingTool") or Player.Backpack:FindFirstChild("PaintingTool")
+	if not Tool or not block then print('cant paint') return end
+	Tool.RF:InvokeServer({ {{block, color}} })
+end
+local CollectionService = game:GetService("CollectionService")
+local function FastPaintBatched(paintDataList)
+	local Tool = Player.Character:FindFirstChild("PaintingTool") or Player.Backpack:FindFirstChild("PaintingTool")
+	if not Tool then return end
+	-- Gửi toàn bộ list {{block, color}, ...} trong 1 request
+	Tool.RF:InvokeServer(paintDataList)
+	
+	for i,v in pairs(paintDataList) do
+		local block, color = v[1], v[2]
+		block.PPart.Color = color
+		if i%500 == 0 then
+			RunService.Heartbeat:Wait()
 		end
-	until scaledblock
-	return scaledblock
-	]]
-end
-function deleteblock(block)
-	local args = {
-		[1] = block
-	}
-
-	local rfevent
-	if game:GetService("Players").LocalPlayer.Character:FindFirstChild("PaintingTool") then
-		rfevent = game:GetService("Players").LocalPlayer.Character.DeleteTool.RF
-	elseif game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("PaintingTool") then
-		rfevent = game:GetService("Players").LocalPlayer.Backpack.DeleteTool.RF
-	else
-		ImageLoader:Destroy()
-		warn("cant find rfevent.")
-		return
 	end
-
-	rfevent:InvokeServer(unpack(args))
 end
 
-local loading = false
-local previewpixels = Instance.new("Folder",workspace)
-previewpixels.Name = "Pixels-Preview"
+local function FastScale(block, s, cframe)
+	local Tool = Player.Character:FindFirstChild("ScalingTool") or Player.Backpack:FindFirstChild("ScalingTool")
+	if not Tool or not block then return end
+	Tool.RF:InvokeServer(block, Vector3.new(s, s, s), cframe)
+end
 
+-- // CORE LOGIC //
+local loading = false
+local BlockFolder = workspace.Blocks:WaitForChild(Player.Name)
 
 Load.MouseButton1Click:Connect(function()
-	if loading == false then
-		loading = true
-		local sizex,sizey = MyPNGdata.PNG.Width*scale,MyPNGdata.PNG.Height*scale
-		local startcframe = currentcframe * CFrame.new(sizex/2,sizey/2,0)
-		if previewpart then
-			previewpart:Destroy()
-		end
-		--[[
-		local antilag = 0
-		for x = 1,MyPNGdata.PNG.Width do
-			for y = 1,MyPNGdata.PNG.Height do
-				antilag += 1
-				if antilag >= 1000 then
-					antilag = 0
-					game:GetService("RunService").Heartbeat:Wait()
-				end
-				local color,alpha = PNG:GetPixel(MyPNGdata.PNG,x,y)
-				local temple = game:GetService("ReplicatedStorage").BuildingParts.PlasticBlock.PPart:Clone()
-				temple.Parent = previewpixels
-				temple.Transparency = 0.9
-				temple.Size = Vector3.new(scale,scale,scale)
-				temple.CFrame = startcframe * CFrame.new(x*scale,y*scale,0):Inverse()
-				temple.Anchored = true
-				temple.CanCollide = false
-				temple.Color = color
-			end
-		end
-		]]
-		workspace:WaitForChild("ClearAllPlayersBoatParts"):FireServer()
-		Title_6.Text = "End load"
-
-		local blacklists = {}
-		local antilag = 0
-		local intask = 0
-		for x = 1,MyPNGdata.PNG.Width,1 do
-			antilag +=1
-			if loading == false then
-				break
-			end
-			local function a()
-				for y = 1,MyPNGdata.PNG.Height,1 do
-					if loading == false then
-						break
-					end
-					local color,alpha = PNG:GetPixel(MyPNGdata.PNG,x,y)
-					local cframe = startcframe * CFrame.new(x*scale,y*scale,0):Inverse()
-					local block = buildBlock(cframe,blacklists)
-					table.insert(blacklists,block)
-					local tag = Instance.new("ObjectValue",block)
-					tag.Name = "IsAPixel"
-					tag.Value = game.Players.LocalPlayer
-					task.spawn(function()
-						spawn(function()
-							paintblock(block,color)
-						end)
-						local e = scaleblock(block,cframe)
-					end)
-				end
-			end
-			if antilag >= 100 then
-				antilag = 0
-				intask+=1
-				a()
-				intask-=1
-			else
-				task.spawn(function()
-					intask+=1
-					a()
-					intask-=1
-				end)
-			end
-		end
-		repeat task.wait() until intask<=0 or loading==false
-		--[[
-			local oldtick = tick()
-		local antilag = 0
-		local x,y = 0,0
-		local blacklists = {}
-		local i = 0
-		local blocks = {}
-		local process = 0
-		local id = 0
-		while true do
-			antilag += 1
-			i += 1
-			id += 1
-			if loading == false then
-				break
-			end
-			if antilag >= 10 then
-				antilag = 0
-				game:GetService("RunService").Heartbeat:Wait()
-			end
-			local color,alpha = PNG:GetPixel(MyPNGdata.PNG,x,y)
-			local cframe = startcframe * CFrame.new(x*scale,y*scale,0):Inverse()
-			if tick()-oldtick >= 1 then
-				oldtick = tick()
-				print(math.floor((id) / (MyPNGdata.PNG.Width * MyPNGdata.PNG.Height) * 10000)/10000 * 100 .."% | ".. id .. "/".. MyPNGdata.PNG.Width * MyPNGdata.PNG.Height)
-			end
-			spawn(function()
-				process += 1
-				local v = buildBlock(cframe,blacklists)
-				table.insert(blocks,{x=x,y=y,block=v,color=color,cframe=cframe})
-				table.insert(blacklists,v)
-				spawn(function()
-					paintblock(v,color)
-				end)
-				local e = scaleblock(v,cframe)
-				local tag = Instance.new("ObjectValue",v)
-				tag.Name = "IsAPixel"
-				tag.Value = game.Players.LocalPlayer
-				process -= 1
-			end)
-			y += 1
-			if y > MyPNGdata.PNG.Height then
-				y = 0
-				x += 1
-			end
-			if x > MyPNGdata.PNG.Width then
-				break
-			end
-		end
-		]]
-		for i,v in pairs(workspace:GetChildren()) do
-			if v.Name == "PlasticBlock" and v:FindFirstChild("Tag") and v.Tag.Value == game.Players.LocalPlayer.Name and not v:FindFirstChild("IsAPixel") then
-				spawn(function()
-					deleteblock(v)
-				end)
-			end
-		end
-		for i,v in pairs(workspace:GetChildren()) do
-			if v:FindFirstChild("IsAPixel") then
-				v.IsAPixel:Destroy()
-			end
-		end
-		previewpixels:ClearAllChildren()
-		loading = false
+	if loading then 
+		loading = false 
 		Title_6.Text = "Load"
-	else
-		loading = false
-		Title_6.Text = "Load"
+		return 
 	end
+
+	loading = true
+	Title_6.Text = "Stop"
+
+	if previewpart then previewpart:Destroy() end
+	workspace:WaitForChild("ClearAllPlayersBoatParts"):FireServer()
+
+	local startcframe = currentcframe * CFrame.new((MyPNGdata.PNG.Width * scale)/2, (MyPNGdata.PNG.Height * scale)/2, 0)
+
+	-- 1. CHUẨN BỊ DỮ LIỆU
+	local pixelQueue = {}
+	for x = 1, MyPNGdata.PNG.Width do
+		for y = 1, MyPNGdata.PNG.Height do
+			local color, alpha = PNG:GetPixel(MyPNGdata.PNG, x, y)
+			if alpha > 0 then
+				local targetCF = startcframe * CFrame.new(x * scale, y * scale, 0):Inverse()
+				table.insert(pixelQueue, { CF = targetCF, Color = color, Pos = targetCF.Position })
+			end
+		end
+	end
+
+	-- Queue chứa các block cần sơn sau khi xây xong
+	local paintQueue = {} 
+
+	task.spawn(function()
+		local totalPixels = #pixelQueue
+
+		-- ====================================================
+		-- PHASE 1: BUILD & SCALE (Dựng khung hình & Kích thước)
+		-- ====================================================
+		Title_6.Text = "Building..."
+
+		for i = 1, totalPixels, BATCH_SIZE do
+			if not loading then break end
+			local currentBatch = {}
+			local batchEnd = math.min(i + BATCH_SIZE - 1, totalPixels)
+
+			-- A. Spam Build
+			for j = i, batchEnd do
+				local pixelData = pixelQueue[j]
+				table.insert(currentBatch, pixelData)
+				task.spawn(function() FastBuild(pixelData.CF, myzone) end)
+				RunService.Heartbeat:Wait()
+			end
+
+			-- B. Wait Replication
+			task.wait(REPLICATION_DELAY)
+
+			-- C. Match & Scale
+			local candidates = BlockFolder:GetChildren()
+			for _, pixelData in ipairs(currentBatch) do
+				for _, block in ipairs(candidates) do
+					if block.Name == "PlasticBlock" and not block:FindFirstChild("Processed") then
+						if (block.PPart.Position - pixelData.Pos).Magnitude < 0.1 then
+							-- Đánh dấu
+							local tag = Instance.new("BoolValue", block)
+							tag.Name = "Processed"
+
+							-- SCALE NGAY LẬP TỨC
+							task.spawn(function() FastScale(block, scale, pixelData.CF) end)
+
+							-- LƯU VÀO HÀNG ĐỢI SƠN (Chưa sơn vội)
+							table.insert(paintQueue, {block, pixelData.Color})
+							break
+						end
+					end
+				end
+				RunService.Heartbeat:Wait()
+			end
+		end
+
+		task.wait(REPLICATION_DELAY)
+
+		FastPaintBatched(paintQueue)
+
+		-- FINISH
+		loading = false
+		Title_6.Text = "Load"
+		for _, v in pairs(BlockFolder:GetChildren()) do
+			if v:FindFirstChild("Processed") then v.Processed:Destroy() end
+		end
+	end)
 end)
 
 local connect
@@ -1598,9 +1407,6 @@ ImageLoader.Destroying:Connect(function()
 	if previewpart then
 		previewpart:Destroy()
 	end 
-	if previewpixels then
-		previewpixels:Destroy()
-	end
 	connect:Disconnect()
 end)
 
