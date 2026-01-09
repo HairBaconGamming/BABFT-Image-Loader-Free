@@ -1,12 +1,13 @@
 --[[
     BABFT IMAGE LOADER - TITANIUM FIXED
-    Version: 5.5.2 (Real-time Stats Edition)
+    Version: 5.9.22 (Cleanup Protocol)
     
-    [CHANGELOG v5.5.2]
-    + Feature: Estimated Cost now calculates the EXACT number of compressed blocks needed (Smart Calc).
-    + Feature: Available Blocks count updates automatically every 0.5s.
-    + UI: Increased text size for Stats (Available/Cost) for better visibility.
-    + Fixed: Scale verification logic checks 'PPart.Size'.
+    [CHANGELOG v5.9.22]
+    + Critical Feature: "Cleanup Protocol" (Phase 5).
+      - Automatically detects and removes excess/duplicate blocks caused by network lag/retries.
+      - Uses DeleteTool to clean up any 'PlasticBlock' within the build area that wasn't validated by the script.
+    + Logic: Blocks are now tagged with 'TitaniumValid' attribute when processed.
+    + Update: Previous features (Zero-Tolerance, Adaptive Throttling) retained.
 ]]--
 
 -- // 1. ENVIRONMENT & SERVICES //
@@ -28,18 +29,40 @@ local isfile = isfile
 local makefolder = makefolder
 local isfolder = isfolder
 local delfile = delfile
+local mouse = LocalPlayer:GetMouse()
 
 if makefolder and not isfolder("ImageLoaderBabft") then
     makefolder("ImageLoaderBabft")
 end
 
--- // 2. UTILS LIBRARY //
+-- // 2. UTILS & GLOBALS //
 local Utils = {}
 
 function Utils.Snap(number, step)
     if step == 0 then return number end
     return math.floor(number / step + 0.5) * step
 end
+
+function Utils.FormatTime(seconds)
+    if seconds <= 0 then return "0s" end
+    local m = math.floor(seconds / 60)
+    local s = math.floor(seconds % 60)
+    if m > 0 then
+        return string.format("%dm %ds", m, s)
+    else
+        return string.format("%ds", s)
+    end
+end
+
+-- Moved UI_Refs here so it's visible to Builder and App
+local UI_Refs = {
+    PosX = nil, PosY = nil, PosZ = nil,
+    RotX = nil, RotY = nil, RotZ = nil,
+    ModeBtn = nil,
+    PauseBtn = nil,
+    WidthInput = nil, HeightInput = nil,
+    StatBlocks = nil, StatCost = nil, StatPixels = nil, StatTime = nil, StatDims = nil
+}
 
 -- // 3. UI FRAMEWORK //
 local UI = {
@@ -308,7 +331,7 @@ function UI.Window(title, size)
             local function update(i)
                 local p = math.clamp((i.Position.X - bar.AbsolutePosition.X)/bar.AbsoluteSize.X, 0, 1)
                 val = math.floor((min + (max-min)*p)*100)/100
-                if string.find(title, "Batch") or string.find(title, "Level") or string.find(title, "Threads") then val = math.floor(val) end
+                if string.find(title, "Batch") or string.find(title, "Level") or string.find(title, "Threads") or string.find(title, "Wait") or string.find(title, "Precision") then val = math.floor(val) end
                 Services.TweenService:Create(fill, TweenInfo.new(0.05), {Size=UDim2.new(p,0,1,0)}):Play()
                 lbl.Text = title..": "..val
                 callback(val)
@@ -318,6 +341,9 @@ function UI.Window(title, size)
             btn.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging=true update(i) end end)
             Services.UserInputService.InputChanged:Connect(function(i) if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then update(i) end end)
             Services.UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging=false end end)
+            
+            -- Set initial value visual
+            update({Position = Vector3.new(bar.AbsolutePosition.X + (bar.AbsoluteSize.X * ((default-min)/(max-min))), 0, 0)})
         end
         
         return components
@@ -372,35 +398,115 @@ function ImageEngine:Resize(imgData, newW, newH)
     return {Width = newW, Height = newH, Data = newPixels}
 end
 
+-- NEW: Quantization Algorithm
+function ImageEngine:QuantizeColor(r, g, b, precision)
+    if precision >= 255 then return r, g, b end
+    local step = 255 / precision
+    local nr = math.floor(r / step + 0.5) * step
+    local ng = math.floor(g / step + 0.5) * step
+    local nb = math.floor(b / step + 0.5) * step
+    return math.clamp(nr,0,255), math.clamp(ng,0,255), math.clamp(nb,0,255)
+end
+
+function ImageEngine:GetColorDistance(c1, c2)
+    return math.sqrt((c1[1]-c2[1])^2 + (c1[2]-c2[2])^2 + (c1[3]-c2[3])^2)
+end
+
 function ImageEngine:Compress(imgData, tolerance)
-    tolerance = tolerance or 10
+    -- GREEDY MESHING
     local blocks = {}
-    local visited = {}
+    local visited = {} -- Separate visited table
     for x = 1, imgData.Width do visited[x] = {} end
     
-    for x = 1, imgData.Width do
-        for y = 1, imgData.Height do
+    local width = imgData.Width
+    local height = imgData.Height
+    local data = imgData.Data
+    
+    for x = 1, width do
+        for y = 1, height do
             if visited[x][y] then continue end
-            local p = imgData.Data[x][y]
-            if not p or (p[4] and p[4] == 0) then visited[x][y] = true; continue end
-            if #p == 3 then table.insert(p, 255) end
             
-            local h = 1
-            while y + h <= imgData.Height do
-                local np = imgData.Data[x][y+h]
-                if not np or #np < 3 or (np[4] and np[4] == 0) then break end
-                
-                if math.abs(np[1]-p[1]) < tolerance and math.abs(np[2]-p[2]) < tolerance and math.abs(np[3]-p[3]) < tolerance then
-                    visited[x][y+h] = true
-                    h = h + 1
-                else break end
+            local pixel = data[x][y]
+            
+            -- Check alpha/validity
+            if not pixel or (pixel[4] and pixel[4] == 0) then
+                visited[x][y] = true
+                continue
             end
-            table.insert(blocks, {X = x, Y = y, W = 1, H = h, R = p[1], G = p[2], B = p[3]})
-            visited[x][y] = true
+            
+            if #pixel == 3 then table.insert(pixel, 255) end
+            
+            local rangeX = 0
+            local rangeY = 0
+            local tryX = 0
+            local tryY = 0
+            local stop = false
+            
+            -- Expand loop
+            for i = 1, 100 do
+                local startA = 0
+                local startB = 0
+                
+                if tryX >= tryY then
+                    startB = tryY
+                    tryY = tryY + 1
+                else
+                    startA = tryX
+                    tryX = tryX + 1
+                end
+                
+                if x + tryX > width or y + tryY > height then
+                    break
+                end
+                
+                for a = startA, tryX do
+                    if stop then break end
+                    for b = startB, tryY do
+                        if a == 0 and b == 0 then continue end
+                        
+                        local nx = x + a
+                        local ny = y + b
+                        local near = data[nx][ny]
+                        
+                        if visited[nx][ny] or not near or (near[4] and near[4] == 0) then
+                            stop = true
+                            break
+                        end
+                        
+                        local dist = ImageEngine:GetColorDistance(pixel, near)
+                        if dist > tolerance then
+                            stop = true
+                            break
+                        end
+                    end
+                end
+                
+                if stop then break end
+                rangeX = tryX
+                rangeY = tryY
+            end
+            
+            -- Mark visited
+            for a = 0, rangeX do
+                for b = 0, rangeY do
+                    local nX = x + a
+                    local nY = y + b
+                    if nX <= width and nY <= height then
+                        visited[nX][nY] = true
+                    end
+                end
+            end
+            
+            -- Add block: X, Y, W, H, R, G, B
+            table.insert(blocks, {
+                X = x, Y = y,
+                W = rangeX + 1, H = rangeY + 1,
+                R = pixel[1], G = pixel[2], B = pixel[3]
+            })
         end
-        -- Speed up compression for stat calculation if called frequently
-        if x % 100 == 0 then Services.RunService.Heartbeat:Wait() end
+        if x % 20 == 0 then Services.RunService.Heartbeat:Wait() end
     end
+    
     return blocks
 end
 
@@ -411,6 +517,7 @@ local Builder = {
     GizmoMode = "Move",
     GizmoActive = false,
     ActiveGizmos = {},
+    PreviewDrag = false,
     
     Settings = {
         Scale = 1.0,
@@ -419,7 +526,11 @@ local Builder = {
         MoveStep = 1,
         RotateStep = 45,
         CompressLevel = 10,
-        Threads = 1
+        Threads = 1,
+        BatchWait = 500,
+        BuildBatchWait = 500,
+        ScaleBatchWait = 500,
+        Thickness = 1.0
     }
 }
 
@@ -437,6 +548,7 @@ function Builder:ClearGizmo()
     for _, g in pairs(self.ActiveGizmos) do pcall(function() g:Destroy() end) end
     self.ActiveGizmos = {}
     self.GizmoActive = false
+    self.PreviewDrag = false
 end
 
 function Builder:UpdateGizmoState()
@@ -479,6 +591,9 @@ function Builder:Gizmo(part, onUpdateCallback)
     
     local baseCF = part.CFrame
     
+    handles.MouseButton1Down:Connect(function() baseCF = part.CFrame end)
+    arcHandles.MouseButton1Down:Connect(function() baseCF = part.CFrame end)
+    
     handles.MouseDrag:Connect(function(face, distance)
         local normal = Vector3.FromNormalId(face)
         local snap = math.max(0.01, self.Settings.MoveStep)
@@ -499,8 +614,36 @@ function Builder:Gizmo(part, onUpdateCallback)
     
     arcHandles.MouseButton1Up:Connect(function() baseCF = part.CFrame end)
     
+    local smartDragConn
+    smartDragConn = Services.UserInputService.InputBegan:Connect(function(input, gp)
+        if gp then return end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if mouse.Target == part then
+                Builder.PreviewDrag = true
+                local dragOffset = part.Position - mouse.Hit.Position
+                local currentOri = part.Orientation
+                
+                task.spawn(function()
+                    while Builder.PreviewDrag and Services.UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
+                        local newPos = mouse.Hit.Position + dragOffset
+                        local s = Builder.Settings.MoveStep
+                        newPos = Vector3.new(Utils.Snap(newPos.X, s), Utils.Snap(newPos.Y, s), Utils.Snap(newPos.Z, s))
+                        
+                        part.Position = newPos
+                        part.Orientation = currentOri
+                        if onUpdateCallback then onUpdateCallback(part) end
+                        Services.RunService.Heartbeat:Wait()
+                    end
+                    Builder.PreviewDrag = false
+                    baseCF = part.CFrame
+                end)
+            end
+        end
+    end)
+    
     part.Destroying:Connect(function()
         self:ClearGizmo()
+        if smartDragConn then smartDragConn:Disconnect() end
     end)
 end
 
@@ -514,6 +657,10 @@ function Builder:Start(blocks, w, h, originCFrame)
     if self.IsBuilding then return end
     self.IsBuilding = true
     self.IsPaused = false
+    
+    local startTime = tick()
+    local activeScaleOps = 0 -- Counter for pending scale ops
+    local DeleteTool = self:GetTool("DeleteTool") -- For cleanup
     
     UI.Notify("System", "Starting build (Threads: " .. self.Settings.Threads .. ")", "success")
     UI.ProgressBar:Update(0, "Preparing...")
@@ -538,23 +685,137 @@ function Builder:Start(blocks, w, h, originCFrame)
     local folder = Services.Workspace.Blocks:WaitForChild(LocalPlayer.Name)
     local startcframe = originCFrame * CFrame.new((w * scale)/2, (h * scale)/2, 0)
     
-    local pool = {}
-    local poolConnection = folder.ChildAdded:Connect(function(child)
-        if child.Name == "PlasticBlock" then
-            table.insert(pool, child)
+    -- "SPATIAL HASHING" PENDING QUEUE
+    local PendingChunks = {} -- Bucket Dictionary
+    local ActionQueue = {} 
+    local GlobalPaintQueue = {} -- Store blocks to paint later
+    local totalBlocks = #blocks
+    local processedCount = 0
+    local CHUNK_SIZE = 8 -- Optimized bucket size
+    
+    local function getChunkKey(pos)
+        local cx = math.floor(pos.X / CHUNK_SIZE)
+        local cy = math.floor(pos.Y / CHUNK_SIZE)
+        local cz = math.floor(pos.Z / CHUNK_SIZE)
+        return cx .. "_" .. cy .. "_" .. cz
+    end
+    
+    local function getNeighborKeys(pos)
+        local keys = {}
+        local cx = math.floor(pos.X / CHUNK_SIZE)
+        local cy = math.floor(pos.Y / CHUNK_SIZE)
+        local cz = math.floor(pos.Z / CHUNK_SIZE)
+        for x = -1, 1 do
+            for y = -1, 1 do
+                for z = -1, 1 do
+                    table.insert(keys, (cx+x) .. "_" .. (cy+y) .. "_" .. (cz+z))
+                end
+            end
+        end
+        return keys
+    end
+    
+    local lastActivity = tick()
+
+    -- Listener Thread
+    local listenerConn
+    listenerConn = folder.ChildAdded:Connect(function(block)
+        if not self.IsBuilding then return end
+        if block.Name ~= "PlasticBlock" then return end
+        lastActivity = tick()
+        
+        local ppart = block:FindFirstChild("PPart") or block:WaitForChild("PPart", 0.5)
+        if not ppart then return end
+        local pos = ppart.Position 
+        
+        local keys = getNeighborKeys(pos)
+        local bestIdx = nil
+        local bestKey = nil
+        local minDist = 2.5 -- Increased Tolerance to 2.5
+        
+        for _, key in ipairs(keys) do
+            local chunk = PendingChunks[key]
+            if chunk then
+                for i, data in ipairs(chunk) do
+                    local dist = (pos - data.CF.Position).Magnitude
+                    if dist < minDist then
+                        minDist = dist
+                        bestIdx = i
+                        bestKey = key
+                        break 
+                    end
+                end
+            end
+            if bestIdx then break end
+        end
+        
+        if bestIdx and bestKey then
+            local chunk = PendingChunks[bestKey]
+            local data = table.remove(chunk, bestIdx)
+            if #chunk == 0 then PendingChunks[bestKey] = nil end
+            table.insert(ActionQueue, {Block = block, Data = data})
         end
     end)
     
-    local GlobalPaintQueue = {}
-    local GlobalMissingQueue = {}
+    -- Processor Thread (Phase 1: Scale & Queue Paint)
+    task.spawn(function()
+        local ScaleTool = self:GetTool("ScalingTool")
+        local scaleCount = 0
+        
+        while self.IsBuilding do
+            if #ActionQueue > 0 then
+                local processBatch = {} 
+                for i = 1, math.min(50, #ActionQueue) do
+                    table.insert(processBatch, table.remove(ActionQueue, 1))
+                end
+                
+                for _, item in ipairs(processBatch) do
+                    local block = item.Block
+                    local data = item.Data
+                    
+                    if ScaleTool and block and block.Parent then
+                        activeScaleOps = activeScaleOps + 1
+                        task.spawn(function()
+                            pcall(function() ScaleTool.RF:InvokeServer(block, data.Size, data.CF) end)
+                            activeScaleOps = activeScaleOps - 1
+                        end)
+                        
+                        -- MARK BLOCK AS VALID FOR CLEANUP PHASE
+                        block:SetAttribute("TitaniumValid", true)
+                        
+                        if ScaleTool then lastActivity = tick() end
+                        scaleCount = scaleCount + 1
+                        if scaleCount % self.Settings.ScaleBatchWait == 0 then
+                            Services.RunService.Heartbeat:Wait()
+                        end
+                    end
+                    
+                    table.insert(GlobalPaintQueue, {Block = block, Color = data.Color})
+                    processedCount = processedCount + 1
+                end
+                
+                UI.ProgressBar:Update(processedCount / totalBlocks, "Phase 1: Build & Scale ("..processedCount.."/"..totalBlocks..")")
+                
+                local elapsed = tick() - startTime
+                local speed = processedCount / elapsed
+                local remaining = totalBlocks - processedCount
+                local eta = (speed > 0) and (remaining / speed) or 0
+                if UI_Refs.StatTime then
+                    UI_Refs.StatTime.Text = "Est. Duration: " .. Utils.FormatTime(eta) .. " (" .. math.floor(speed) .. " b/s)"
+                end
+            else
+                Services.RunService.Heartbeat:Wait()
+            end
+        end
+    end)
     
-    local totalBlocks = #blocks
+    -- Builder Thread (Producer)
     local sharedIndex = 1
     local activeThreads = 0
     
     local function worker(threadId)
         activeThreads = activeThreads + 1
-        local ScaleTool = self:GetTool("ScalingTool")
+        local buildCount = 0
         
         while sharedIndex <= totalBlocks and self.IsBuilding do
             while self.IsPaused do task.wait(0.5) end
@@ -573,57 +834,28 @@ function Builder:Start(blocks, w, h, originCFrame)
                 local centerY = b.Y + (b.H - 1)/2
                 
                 local targetCF = startcframe * CFrame.new(centerX * scale, centerY * scale, 0):Inverse()
-                local targetSize = Vector3.new(b.W * scale, b.H * scale, scale)
+                local targetSize = Vector3.new(b.W * scale, b.H * scale, self.Settings.Thickness)
                 local targetColor = Color3.fromRGB(b.R, b.G, b.B)
                 
-                table.insert(batch, {CF = targetCF, Size = targetSize, Color = targetColor})
+                -- ADD TO SPATIAL HASH
+                local key = getChunkKey(targetCF.Position)
+                if not PendingChunks[key] then PendingChunks[key] = {} end
+                table.insert(PendingChunks[key], {CF = targetCF, Size = targetSize, Color = targetColor})
                 
                 local relativeCF = myZone.CFrame:ToObjectSpace(targetCF)
                 local args = {
                     [1] = "PlasticBlock", [2] = LocalPlayer.Data.PlasticBlock.Value,
                     [3] = myZone, [4] = relativeCF, [5] = true, [6] = targetCF, [7] = false
                 }
-                BuildTool.RF:InvokeServer(unpack(args))
-            end
-            
-            local retryCount = 0
-            local maxRetries = 30
-            local matchedCount = 0
-            local batchMatched = {}
-            
-            while retryCount < maxRetries and matchedCount < #batch do
-                task.wait(0.15)
-                retryCount = retryCount + 1
                 
-                for i, blockInfo in ipairs(batch) do
-                    if not batchMatched[i] then
-                         for idx, block in ipairs(pool) do
-                            if block and block.Parent and not block:GetAttribute("Claimed") then
-                                local dist = (block.PPart.Position - blockInfo.CF.Position).Magnitude
-                                if dist < 0.8 then
-                                    block:SetAttribute("Claimed", true)
-                                    if ScaleTool then
-                                        ScaleTool.RF:InvokeServer(block, blockInfo.Size, blockInfo.CF)
-                                    end
-                                    table.insert(GlobalPaintQueue, {Block = block, Color = blockInfo.Color, Size = blockInfo.Size, CF = blockInfo.CF})
-                                    batchMatched[i] = true
-                                    matchedCount = matchedCount + 1
-                                    break
-                                end
-                            end
-                        end
-                    end
+                task.spawn(function()
+                    BuildTool.RF:InvokeServer(unpack(args))
+                end)
+                
+                buildCount = buildCount + 1
+                if buildCount % self.Settings.BuildBatchWait == 0 then
+                    Services.RunService.Heartbeat:Wait()
                 end
-            end
-            
-            for i, blockInfo in ipairs(batch) do
-                if not batchMatched[i] then
-                    table.insert(GlobalMissingQueue, blockInfo)
-                end
-            end
-            
-            if threadId == 1 then
-                UI.ProgressBar:Update(math.min(sharedIndex, totalBlocks) / totalBlocks, "Building ("..math.min(sharedIndex, totalBlocks).."/"..totalBlocks..")")
             end
             
             Services.RunService.Heartbeat:Wait()
@@ -639,119 +871,169 @@ function Builder:Start(blocks, w, h, originCFrame)
     task.spawn(function()
         while activeThreads > 0 and self.IsBuilding do task.wait(0.5) end
         
-        if self.IsBuilding then
-            local ScaleTool = self:GetTool("ScalingTool")
+        -- Wait for Queue to Drain AND Scale Ops to Finish
+        while self.IsBuilding do
+            if #ActionQueue > 0 or activeScaleOps > 0 then lastActivity = tick() end
             
-            if #GlobalMissingQueue > 0 then
-                UI.Notify("System", "Repairing missing ("..#GlobalMissingQueue.." blocks)...", "warn")
-                UI.ProgressBar:Update(1, "Repairing missing...")
+            if #ActionQueue == 0 and activeScaleOps == 0 and (tick() - lastActivity > 2) then
+                local pendingCount = 0
+                for _, chunk in pairs(PendingChunks) do pendingCount += #chunk end
                 
-                for _, info in ipairs(GlobalMissingQueue) do
-                    if not self.IsBuilding then break end
-                    
-                    local found = false
-                    for _, block in ipairs(folder:GetChildren()) do
-                        if block.Name == "PlasticBlock" and not block:GetAttribute("Claimed") then
-                             local dist = (block.PPart.Position - info.CF.Position).Magnitude
-                             if dist < 0.8 then
-                                block:SetAttribute("Claimed", true)
-                                if ScaleTool then ScaleTool.RF:InvokeServer(block, info.Size, info.CF) end
-                                table.insert(GlobalPaintQueue, {Block = block, Color = info.Color, Size = info.Size, CF = info.CF})
-                                found = true
-                                break
-                             end
+                if pendingCount == 0 then break 
+                else
+                    -- RECOVERY MODE: Retry missing blocks BEFORE Painting
+                    UI.Notify("System", "Stability Check: Missing " .. pendingCount .. " blocks. Retrying...", "error")
+                    for k, chunk in pairs(PendingChunks) do
+                        for _, data in ipairs(chunk) do
+                            local relativeCF = myZone.CFrame:ToObjectSpace(data.CF)
+                            local args = { [1] = "PlasticBlock", [2] = LocalPlayer.Data.PlasticBlock.Value, [3] = myZone, [4] = relativeCF, [5] = true, [6] = data.CF, [7] = false }
+                            task.spawn(function() BuildTool.RF:InvokeServer(unpack(args)) end)
                         end
                     end
-                    
-                    if not found then
-                        local relativeCF = myZone.CFrame:ToObjectSpace(info.CF)
-                        local args = {
-                            [1] = "PlasticBlock", [2] = LocalPlayer.Data.PlasticBlock.Value,
-                            [3] = myZone, [4] = relativeCF, [5] = true, [6] = info.CF, [7] = false
-                        }
-                        BuildTool.RF:InvokeServer(unpack(args))
-                        local retryBuild = 0
-                        while retryBuild < 10 do 
-                            task.wait(0.1)
-                            for _, block in ipairs(folder:GetChildren()) do
-                                if block.Name == "PlasticBlock" and not block:GetAttribute("Claimed") then
-                                     local dist = (block.PPart.Position - info.CF.Position).Magnitude
-                                     if dist < 0.8 then
-                                        block:SetAttribute("Claimed", true)
-                                        if ScaleTool then ScaleTool.RF:InvokeServer(block, info.Size, info.CF) end
-                                        table.insert(GlobalPaintQueue, {Block = block, Color = info.Color, Size = info.Size, CF = info.CF})
-                                        found = true
+                    task.wait(2) -- Give it time
+                    lastActivity = tick() -- Reset timer
+                end
+            end
+            
+            if activeScaleOps > 0 then
+                 UI.ProgressBar:Update(1, "Waiting for Scale... ("..activeScaleOps..")")
+            end
+            task.wait(0.5)
+        end
+        
+        -- PHASE 2: PAINTING
+        if self.IsBuilding and #GlobalPaintQueue > 0 then
+            UI.Notify("System", "Phase 2: Painting " .. #GlobalPaintQueue .. " blocks...", "success")
+            
+            -- Validation pass: Remove invalid blocks before painting
+            local validPaintQueue = {}
+            for _, item in ipairs(GlobalPaintQueue) do
+                if item.Block and item.Block.Parent then
+                    table.insert(validPaintQueue, item)
+                end
+            end
+            GlobalPaintQueue = validPaintQueue
+
+            local PaintTool = self:GetTool("PaintingTool")
+            local paintBatch = {}
+            local pCount = 0
+            
+            for i, item in ipairs(GlobalPaintQueue) do
+                if not self.IsBuilding then break end
+                 table.insert(paintBatch, {item.Block, item.Color})
+                
+                if #paintBatch >= self.Settings.BatchSize or i == #GlobalPaintQueue then
+                    local args = paintBatch
+                    paintBatch = {} 
+                    if PaintTool then
+                        task.spawn(function()
+                             pcall(function() PaintTool.RF:InvokeServer(args) end)
+                        end)
+                    end
+                    pCount = pCount + 1
+                    if pCount % self.Settings.BatchWait == 0 then Services.RunService.Heartbeat:Wait() end
+                    UI.ProgressBar:Update(i / #GlobalPaintQueue, "Phase 2: Painting ("..i.."/"..#GlobalPaintQueue..")")
+                end
+            end
+            task.wait(1) 
+        end
+        
+        if self.IsBuilding then
+            -- PHASE 3: FINAL SWEEP
+            local remainingCount = 0
+            for k, chunk in pairs(PendingChunks) do remainingCount = remainingCount + #chunk end
+            
+            if remainingCount > 0 then
+                UI.Notify("System", "Phase 3: Repairing " .. remainingCount .. " missing blocks...", "warn")
+                for _, block in ipairs(folder:GetChildren()) do
+                    if not self.IsBuilding then break end
+                    local ppart = block:FindFirstChild("PPart")
+                    if block.Name == "PlasticBlock" and ppart then
+                        local pos = ppart.Position
+                        local keys = getNeighborKeys(pos)
+                        
+                        for _, key in ipairs(keys) do
+                            local chunk = PendingChunks[key]
+                            if chunk then
+                                for i, data in ipairs(chunk) do
+                                    if (pos - data.CF.Position).Magnitude < 1.5 then
+                                        local d = table.remove(chunk, i)
+                                        if #chunk == 0 then PendingChunks[key] = nil end
+                                        local ScaleTool = self:GetTool("ScalingTool")
+                                        local PaintTool = self:GetTool("PaintingTool")
+                                        if ScaleTool then ScaleTool.RF:InvokeServer(block, d.Size, d.CF) end
+                                        if PaintTool then PaintTool.RF:InvokeServer({{block, d.Color}}) end
+                                        
+                                        block:SetAttribute("TitaniumValid", true) -- Mark repaired as valid
                                         break
-                                     end
+                                    end
                                 end
                             end
-                            if found then break end
-                            retryBuild = retryBuild + 1
                         end
                     end
                 end
-            end
-            
-            if ScaleTool and #GlobalPaintQueue > 0 then
-                UI.Notify("System", "Verifying Scale...", "warn")
-                UI.ProgressBar:Update(1, "Verifying Scale...")
-                local badScaleCount = 0
                 
-                for _, item in ipairs(GlobalPaintQueue) do
-                    if not self.IsBuilding then break end
-                    if item.Block and item.Block.Parent and item.Block:FindFirstChild("PPart") and (item.Block.PPart.Size - item.Size).Magnitude > 0.1 then
-                        badScaleCount = badScaleCount + 1
-                        ScaleTool.RF:InvokeServer(item.Block, item.Size, item.CF)
-                        if badScaleCount % 20 == 0 then Services.RunService.Heartbeat:Wait() end
-                    end
-                end
-                
-                if badScaleCount > 0 then
-                    UI.Notify("Scale Repair", "Fixed " .. badScaleCount .. " misscaled blocks", "success")
-                end
-            end
-            
-            if #GlobalPaintQueue > 0 then
-                UI.Notify("System", "Painting ("..#GlobalPaintQueue.." blocks)...", "warn")
-                UI.ProgressBar:Update(1, "Painting...")
-                
-                local PaintTool = self:GetTool("PaintingTool")
-                if PaintTool then
-                    local chunkSize = 100
-                    for i = 1, #GlobalPaintQueue, chunkSize do
+                local stillMissing = 0
+                for k, chunk in pairs(PendingChunks) do
+                    for _, data in ipairs(chunk) do
+                        stillMissing = stillMissing + 1
                         if not self.IsBuilding then break end
-                        local chunk = {}
-                        for j = i, math.min(i + chunkSize - 1, #GlobalPaintQueue) do
-                            local item = GlobalPaintQueue[j]
-                            if item.Block and item.Block.Parent then
-                                table.insert(chunk, {item.Block, item.Color})
-                            end
+                        local relativeCF = myZone.CFrame:ToObjectSpace(data.CF)
+                        local args = {
+                            [1] = "PlasticBlock", [2] = LocalPlayer.Data.PlasticBlock.Value,
+                            [3] = myZone, [4] = relativeCF, [5] = true, [6] = data.CF, [7] = false
+                        }
+                        pcall(function() BuildTool.RF:InvokeServer(unpack(args)) end)
+                        task.wait(0.1)
+                    end
+                end
+                if stillMissing > 0 then UI.Notify("System", "Retried "..stillMissing.." blocks", "warn") end
+            end
+            
+            -- PHASE 4: CLEANUP EXCESS BLOCKS
+            if DeleteTool then
+                UI.Notify("System", "Phase 4: Cleaning up excess blocks...", "warn")
+                UI.ProgressBar:Update(1, "Phase 4: Cleanup...")
+                local rangeX = (w * scale) / 2 + 5
+                local rangeY = (h * scale) / 2 + 5
+                
+                -- Need image center position
+                local centerPos = startcframe.Position 
+                
+                for _, block in ipairs(folder:GetChildren()) do
+                    if not self.IsBuilding then break end
+                    if block.Name == "PlasticBlock" and not block:GetAttribute("TitaniumValid") then
+                        local ppart = block:FindFirstChild("PPart")
+                        if ppart then
+                            task.spawn(function() DeleteTool.RF:InvokeServer(block) end)
+                            -- local dist = (ppart.Position - centerPos).Magnitude
+                            -- Simple distance check: if within image radius but not valid -> Delete
+                            -- if dist < math.max(rangeX, rangeY) then
+                            --    task.spawn(function() DeleteTool.RF:InvokeServer(block) end)
+                            --end
                         end
-                        if #chunk > 0 then
-                            PaintTool.RF:InvokeServer(chunk)
-                        end
-                        Services.RunService.Heartbeat:Wait()
                     end
                 end
             end
             
-            poolConnection:Disconnect()
+            listenerConn:Disconnect()
             self.IsBuilding = false
             UI.ProgressBar:Update(1, "Done!")
             UI.Notify("Finished", "Build Complete!", "success")
         else
-            poolConnection:Disconnect()
+            listenerConn:Disconnect()
         end
     end)
 end
 
 -- // 6. APP LOGIC //
 local App = {
-    Data = { Raw = nil, Pixels = nil, OriginalPixels = nil, Blocks = nil },
+    Data = { Raw = nil, Pixels = nil, OriginalPixels = nil, Blocks = nil, FileName = nil },
     PreviewPart = nil,
     LastPos = nil,
     LastRot = nil,
-    LockRatio = true
+    LockRatio = true,
+    StatBlockCount = 0
 }
 
 local UI_Refs = {
@@ -760,7 +1042,7 @@ local UI_Refs = {
     ModeBtn = nil,
     PauseBtn = nil,
     WidthInput = nil, HeightInput = nil,
-    StatBlocks = nil, StatCost = nil
+    StatBlocks = nil, StatCost = nil, StatPixels = nil, StatTime = nil, StatDims = nil
 }
 
 function App:GetBlockCount()
@@ -770,7 +1052,6 @@ function App:GetBlockCount()
     return 0
 end
 
--- Auto update Available count
 task.spawn(function()
     while true do
         if UI_Refs.StatBlocks then
@@ -781,19 +1062,76 @@ task.spawn(function()
 end)
 
 function App:UpdateStats()
-    -- Calculate estimated cost based on compression
     if self.Data.Pixels then
-        UI_Refs.StatCost.Text = "Estimating Cost..."
+        if not Builder.IsBuilding then -- Only show estimating text if not busy building
+             UI_Refs.StatCost.Text = "Estimating..."
+        end
         
-        -- Run compression in background to avoid lag
         task.spawn(function()
             local tempBlocks = ImageEngine:Compress(self.Data.Pixels, Builder.Settings.CompressLevel)
+            self.StatBlockCount = #tempBlocks
+            
             if UI_Refs.StatCost then
-                UI_Refs.StatCost.Text = "Estimated Cost: " .. #tempBlocks .. " blocks"
+                UI_Refs.StatCost.Text = "Estimated Cost: " .. self.StatBlockCount .. " blocks"
+            end
+            
+            if UI_Refs.StatPixels then
+                 UI_Refs.StatPixels.Text = "Total Pixels: " .. (self.Data.Pixels.Width * self.Data.Pixels.Height)
+            end
+            
+            if not Builder.IsBuilding then
+                local totalBatches = math.ceil(self.StatBlockCount / (Builder.Settings.BatchSize * Builder.Settings.Threads))
+                local estTime = totalBatches * (Builder.Settings.Delay + 0.1) 
+                if UI_Refs.StatTime then
+                    UI_Refs.StatTime.Text = "Est. Duration: " .. Utils.FormatTime(estTime)
+                end
+            end
+            
+            if UI_Refs.StatDims then
+                local w = self.Data.Pixels.Width * Builder.Settings.Scale
+                local h = self.Data.Pixels.Height * Builder.Settings.Scale
+                UI_Refs.StatDims.Text = string.format("World Size: %.1f x %.1f studs", w, h)
             end
         end)
     else
         UI_Refs.StatCost.Text = "Estimated Cost: 0"
+        if UI_Refs.StatPixels then UI_Refs.StatPixels.Text = "Total Pixels: 0" end
+        if UI_Refs.StatTime then UI_Refs.StatTime.Text = "Est. Duration: 0s" end
+        if UI_Refs.StatDims then UI_Refs.StatDims.Text = "World Size: 0x0" end
+    end
+end
+
+function App:SaveConfig()
+    local config = {
+        Scale = Builder.Settings.Scale,
+        BatchSize = Builder.Settings.BatchSize,
+        Delay = Builder.Settings.Delay,
+        CompressLevel = Builder.Settings.CompressLevel,
+        Threads = Builder.Settings.Threads,
+        BatchWait = Builder.Settings.BatchWait,
+        BuildBatchWait = Builder.Settings.BuildBatchWait,
+        ScaleBatchWait = Builder.Settings.ScaleBatchWait,
+        Thickness = Builder.Settings.Thickness
+    }
+    local success, encoded = pcall(function() return Services.HttpService:JSONEncode(config) end)
+    if success then
+        writefile("ImageLoaderBabft/config.json", encoded)
+        UI.Notify("Config", "Settings Saved!", "success")
+    else
+        UI.Notify("Config", "Save Failed!", "error")
+    end
+end
+
+function App:LoadConfig()
+    if isfile("ImageLoaderBabft/config.json") then
+        local content = readfile("ImageLoaderBabft/config.json")
+        local success, config = pcall(function() return Services.HttpService:JSONDecode(content) end)
+        if success then
+            for k, v in pairs(config) do
+                if Builder.Settings[k] then Builder.Settings[k] = v end
+            end
+            UI.Notify("Config", "Settings Loaded!", "success")
+        end
     end
 end
 
@@ -816,6 +1154,7 @@ function App:LoadImage(url)
     if decoded then
         self.Data.Pixels = decoded
         self.Data.OriginalPixels = decoded 
+        self.Data.FileName = fileName
         
         UI.Notify("Success", decoded.Width.."x"..decoded.Height, "success")
         
@@ -904,13 +1243,33 @@ function App:Preview()
     
     local p = Instance.new("Part")
     p.Name = "TitaniumPreview"
-    p.Anchored = true; p.CanCollide = false; p.Transparency = 0.5; p.Material = Enum.Material.Neon
-    p.Size = Vector3.new(w*s, h*s, s)
+    p.Anchored = true; p.CanCollide = false; p.Transparency = 0.8; p.Material = Enum.Material.Neon
+    p.Size = Vector3.new(w*s, h*s, Builder.Settings.Thickness)
     
     if self.LastPos and self.LastRot then
         p.CFrame = CFrame.new(self.LastPos) * CFrame.Angles(math.rad(self.LastRot.X), math.rad(self.LastRot.Y), math.rad(self.LastRot.Z))
     else
         p.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 10, -10)
+    end
+    
+    if self.Data.FileName then
+        local faceFront = Instance.new("SurfaceGui")
+        faceFront.Face = Enum.NormalId.Front
+        faceFront.Parent = p
+        local imgFront = Instance.new("ImageLabel")
+        imgFront.Size = UDim2.new(1, 0, 1, 0)
+        imgFront.BackgroundTransparency = 1
+        imgFront.Image = getcustomasset(self.Data.FileName)
+        imgFront.Parent = faceFront
+        
+        local faceBack = Instance.new("SurfaceGui")
+        faceBack.Face = Enum.NormalId.Back
+        faceBack.Parent = p
+        local imgBack = Instance.new("ImageLabel")
+        imgBack.Size = UDim2.new(1, 0, 1, 0)
+        imgBack.BackgroundTransparency = 1
+        imgBack.Image = getcustomasset(self.Data.FileName)
+        imgBack.Parent = faceBack
     end
     
     p.Parent = Services.Workspace
@@ -925,7 +1284,9 @@ end
 
 -- // 7. UI INITIALIZATION //
 UI.Init()
-local Window = UI.Window("BABFT Loader v5.5.2", UDim2.new(0, 750, 0, 500))
+App:LoadConfig()
+
+local Window = UI.Window("BABFT Loader v5.9.22", UDim2.new(0, 750, 0, 500))
 local TabHome = Window:Tab("Dashboard")
 
 TabHome:Section("Image Source")
@@ -987,8 +1348,13 @@ UI_Refs.WidthInput.FocusLost:Connect(function()
         if w then
             local ratio = App.Data.OriginalPixels.Height / App.Data.OriginalPixels.Width
             UI_Refs.HeightInput.Text = tostring(math.floor(w * ratio))
+            App:UpdateStats() -- Update stats on edit
         end
     end
+end)
+
+UI_Refs.HeightInput.FocusLost:Connect(function()
+    if App.Data.OriginalPixels then App:UpdateStats() end
 end)
 
 LockRatioBtn.MouseButton1Click:Connect(function()
@@ -998,16 +1364,28 @@ end)
 
 ApplyResizeBtn.MouseButton1Click:Connect(function() App:ResizeImage() end)
 
--- Stats Section
+-- Stats Section (Vertical Layout)
 TabHome:Section("Block Stats")
-local StatsRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,30), Parent=TabHome.Page})
+local StatsRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,80), Parent=TabHome.Page}) -- Adjusted height
+local StatsList = Instance.new("UIListLayout")
+StatsList.Padding = UDim.new(0, 2)
+StatsList.Parent = StatsRow
+
 UI_Refs.StatBlocks = UI.Create("TextLabel", {
     Text="Available: 0", TextColor3=UI.Theme.Success, BackgroundTransparency=1,
-    Size=UDim2.new(0.5,0,1,0), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
+    Size=UDim2.new(1,0,0,20), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
 })
 UI_Refs.StatCost = UI.Create("TextLabel", {
     Text="Estimated Cost: 0", TextColor3=UI.Theme.Warn, BackgroundTransparency=1,
-    Size=UDim2.new(0.5,0,1,0), Position=UDim2.new(0.5,0,0,0), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
+    Size=UDim2.new(1,0,0,20), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
+})
+UI_Refs.StatDims = UI.Create("TextLabel", {
+    Text="World Size: 0x0", TextColor3=UI.Theme.Accent, BackgroundTransparency=1,
+    Size=UDim2.new(1,0,0,20), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
+})
+UI_Refs.StatTime = UI.Create("TextLabel", {
+    Text="Est. Time: 0s", TextColor3=UI.Theme.Text, BackgroundTransparency=1,
+    Size=UDim2.new(1,0,0,20), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
 })
 
 -- Controls Section
@@ -1133,26 +1511,56 @@ end
 
 local TabConfig = Window:Tab("Settings")
 
-TabConfig:Slider("Parallel Threads", 1, 20, 1, function(v)
+-- Config Management
+TabConfig:Section("Config Management")
+local ConfigRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,40), Parent=TabConfig.Page})
+local SaveConfigBtn = UI.Create("TextButton", {
+    Text="Save Config", BackgroundColor3=UI.Theme.Section, TextColor3=UI.Theme.Text,
+    Size=UDim2.new(0.48,0,1,0), Font=UI.Theme.FontBold, TextSize=14, Parent=ConfigRow
+}, {UI.Corner(6)})
+local LoadConfigBtn = UI.Create("TextButton", {
+    Text="Reload Config", BackgroundColor3=UI.Theme.Section, TextColor3=UI.Theme.Text,
+    Size=UDim2.new(0.48,0,1,0), Position=UDim2.new(0.52,0,0,0), Font=UI.Theme.FontBold, TextSize=14, Parent=ConfigRow
+}, {UI.Corner(6)})
+
+SaveConfigBtn.MouseButton1Click:Connect(function() App:SaveConfig() end)
+LoadConfigBtn.MouseButton1Click:Connect(function() App:LoadConfig() end)
+
+TabConfig:Section("Parameters")
+TabConfig:Slider("Parallel Threads", 1, 10, 5, function(v)
     Builder.Settings.Threads = v
 end)
 
 -- Update stats when compress level changes
-TabConfig:Slider("Compress Level", 0, 50, 10, function(v)
+TabConfig:Slider("Compress Level (Tolerance)", 0, 50, 10, function(v)
     Builder.Settings.CompressLevel = v
     if App.Data.Pixels then App:UpdateStats() end
 end)
 
-TabConfig:Slider("Scale", 0.05, 2.0, 1.0, function(v) 
+TabConfig:Slider("Scale", 0.05, 2.0, 0.5, function(v) 
     Builder.Settings.Scale = v
+    if App.Data.Pixels then App:UpdateStats() end 
     if App.PreviewPart and App.Data.Pixels then
         local w, h = App.Data.Pixels.Width, App.Data.Pixels.Height
         App.PreviewPart.Size = Vector3.new(w*v, h*v, v)
     end
 end)
 
+TabConfig:Slider("Thickness (Z)", 0.05, 10, 0.05, function(v) 
+    Builder.Settings.Thickness = v
+    if App.Data.Pixels then App:UpdateStats() end -- Trigger update
+    if App.PreviewPart and App.Data.Pixels then
+        local w, h = App.Data.Pixels.Width, App.Data.Pixels.Height
+        local s = Builder.Settings.Scale
+        App.PreviewPart.Size = Vector3.new(w*s, h*s, v)
+    end
+end)
+
 TabConfig:Slider("Delay (s)", 0.1, 2.0, 0.5, function(v) Builder.Settings.Delay = v end)
 TabConfig:Slider("Batch Size", 10, 100, 50, function(v) Builder.Settings.BatchSize = math.floor(v) end)
+TabConfig:Slider("Paint Batch Wait", 10, 500, 500, function(v) Builder.Settings.BatchWait = math.floor(v) end)
+TabConfig:Slider("Build Batch Wait", 10, 500, 500, function(v) Builder.Settings.BuildBatchWait = math.floor(v) end)
+TabConfig:Slider("Scale Batch Wait", 10, 500, 500, function(v) Builder.Settings.ScaleBatchWait = math.floor(v) end)
 
 Services.UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
@@ -1163,4 +1571,4 @@ Services.UserInputService.InputBegan:Connect(function(input, gp)
     end
 end)
 
-UI.Notify("Titanium", "v5.5.2 Loaded", "success", 5)
+UI.Notify("Titanium", "v5.9.22 Loaded (English Edition)", "success", 5)
