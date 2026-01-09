@@ -1462,8 +1462,8 @@ BuildBtn.MouseButton1Click:Connect(function()
     if not pixels and not Builder.Settings.RAMOptimized then return UI.Notify("Error", "No image!", "error") end
     
     Builder.IsPaused = false
-    PauseBtn.Text = "Pause"
-    PauseBtn.BackgroundColor3 = UI.Theme.Warn
+    UI_Refs.PauseBtn.Text = "Pause"
+    UI_Refs.PauseBtn.BackgroundColor3 = UI.Theme.Warn
 
     local originCF
     if App.PreviewPart then
@@ -1703,7 +1703,7 @@ TabConfig:Toggle("RAM Optimized Mode", false, function(v)
 end)
 
 TabConfig:Section("Parameters")
-TabConfig:Slider("Parallel Threads", 1, 20, 1, function(v)
+TabConfig:Slider("Parallel Threads", 1, 20, 5, function(v)
     Builder.Settings.Threads = v
 end)
 
@@ -1713,7 +1713,7 @@ TabConfig:Slider("Compress Level (Tolerance)", 0, 50, 10, function(v)
     if App.Data.Pixels then App:UpdateStats() end
 end)
 
-TabConfig:Slider("Scale", 0.05, 2.0, 1.0, function(v) 
+TabConfig:Slider("Scale", 0.05, 2.0, 0.5, function(v) 
     Builder.Settings.Scale = v
     if App.Data.Pixels then App:UpdateStats() end 
     if App.PreviewPart and App.Data.Pixels then
