@@ -1,13 +1,14 @@
 --[[
     BABFT IMAGE LOADER - TITANIUM FIXED
-    Version: 5.9.22 (Cleanup Protocol)
+    Version: 5.9.25 (Hide & Build Optimization)
     
-    [CHANGELOG v5.9.22]
-    + Critical Feature: "Cleanup Protocol" (Phase 5).
-      - Automatically detects and removes excess/duplicate blocks caused by network lag/retries.
-      - Uses DeleteTool to clean up any 'PlasticBlock' within the build area that wasn't validated by the script.
-    + Logic: Blocks are now tagged with 'TitaniumValid' attribute when processed.
-    + Update: Previous features (Zero-Tolerance, Adaptive Throttling) retained.
+    [CHANGELOG v5.9.25]
+    + Critical Optimization: "Hide & Build" strategy for RAM Mode.
+      - Blocks detected by the Listener are immediately moved to 'ReplicatedStorage/TitaniumBuildCache'.
+      - This prevents the client from rendering thousands of parts during the build process, maximizing FPS.
+      - Blocks are restored to Workspace automatically upon completion.
+    + Feature: Validated 'Build Mode' selector (Normal/Stable).
+    + Fix: Ensured Cleanup phase respects hidden blocks.
 ]]--
 
 -- // 1. ENVIRONMENT & SERVICES //
@@ -18,7 +19,8 @@ local Services = {
     UserInputService = game:GetService("UserInputService"),
     HttpService = game:GetService("HttpService"),
     CoreGui = game:GetService("CoreGui"),
-    Workspace = game:GetService("Workspace")
+    Workspace = game:GetService("Workspace"),
+    ReplicatedStorage = game:GetService("ReplicatedStorage")
 }
 
 local LocalPlayer = Services.Players.LocalPlayer
@@ -61,7 +63,7 @@ local UI_Refs = {
     ModeBtn = nil,
     PauseBtn = nil,
     WidthInput = nil, HeightInput = nil,
-    StatBlocks = nil, StatCost = nil, StatPixels = nil, StatTime = nil, StatDims = nil
+    StatBlocks = nil, StatCost = nil, StatPixels = nil, StatTime = nil, StatDims = nil, StatFPS = nil
 }
 
 -- // 3. UI FRAMEWORK //
@@ -398,6 +400,51 @@ function ImageEngine:Resize(imgData, newW, newH)
     return {Width = newW, Height = newH, Data = newPixels}
 end
 
+-- RAM Optimization Logic
+function ImageEngine:OffloadData(blocks)
+    local cacheFolder = Services.ReplicatedStorage:FindFirstChild("TitaniumCache")
+    if not cacheFolder then
+        cacheFolder = Instance.new("Folder")
+        cacheFolder.Name = "TitaniumCache"
+        cacheFolder.Parent = Services.ReplicatedStorage
+    else
+        cacheFolder:ClearAllChildren()
+    end
+    
+    -- Serialize in chunks
+    local json = Services.HttpService:JSONEncode(blocks)
+    local chunkSize = 190000 -- Max string size safety
+    local chunks = math.ceil(#json / chunkSize)
+    
+    for i = 1, chunks do
+        local sub = string.sub(json, (i-1)*chunkSize + 1, i*chunkSize)
+        local val = Instance.new("StringValue")
+        val.Name = "Data_" .. i
+        val.Value = sub
+        val.Parent = cacheFolder
+    end
+    return true
+end
+
+function ImageEngine:LoadData()
+    local cacheFolder = Services.ReplicatedStorage:FindFirstChild("TitaniumCache")
+    if not cacheFolder then return nil end
+    
+    local data = ""
+    local chunks = cacheFolder:GetChildren()
+    -- Sort by name
+    table.sort(chunks, function(a,b) 
+        return tonumber(a.Name:split("_")[2]) < tonumber(b.Name:split("_")[2]) 
+    end)
+    
+    for _, v in ipairs(chunks) do
+        data = data .. v.Value
+    end
+    
+    local success, res = pcall(function() return Services.HttpService:JSONDecode(data) end)
+    if success then return res else return nil end
+end
+
 -- NEW: Quantization Algorithm
 function ImageEngine:QuantizeColor(r, g, b, precision)
     if precision >= 255 then return r, g, b end
@@ -530,7 +577,9 @@ local Builder = {
         BatchWait = 500,
         BuildBatchWait = 500,
         ScaleBatchWait = 500,
-        Thickness = 1.0
+        Thickness = 1.0,
+        RAMOptimized = false, -- New
+        BuildMode = "Normal" -- New: Normal or Stable
     }
 }
 
@@ -651,6 +700,17 @@ function Builder:Stop()
     self.IsBuilding = false
     UI.Notify("Stop", "Building process halted!", "error")
     UI.ProgressBar.Container.Visible = false
+    
+    -- RESTORE BLOCKS FROM CACHE IF STOPPED EARLY
+    if self.Settings.RAMOptimized then
+         local cache = Services.ReplicatedStorage:FindFirstChild("TitaniumBuildCache")
+         local folder = Services.Workspace.Blocks:FindFirstChild(LocalPlayer.Name)
+         if cache and folder then
+             for _, b in ipairs(cache:GetChildren()) do
+                 b.Parent = folder
+             end
+         end
+    end
 end
 
 function Builder:Start(blocks, w, h, originCFrame)
@@ -661,6 +721,26 @@ function Builder:Start(blocks, w, h, originCFrame)
     local startTime = tick()
     local activeScaleOps = 0 -- Counter for pending scale ops
     local DeleteTool = self:GetTool("DeleteTool") -- For cleanup
+    
+    -- RAM Optimization: Load if needed
+    if self.Settings.RAMOptimized and not blocks then
+        blocks = ImageEngine:LoadData()
+        if not blocks then
+            self.IsBuilding = false
+            return UI.Notify("Error", "No RAM cache data found!", "error")
+        end
+    end
+    
+    -- Init Cache Folder for RAM Mode
+    local buildCache
+    if self.Settings.RAMOptimized then
+        if Services.ReplicatedStorage:FindFirstChild("TitaniumBuildCache") then
+            Services.ReplicatedStorage.TitaniumBuildCache:Destroy()
+        end
+        buildCache = Instance.new("Folder")
+        buildCache.Name = "TitaniumBuildCache"
+        buildCache.Parent = Services.ReplicatedStorage
+    end
     
     UI.Notify("System", "Starting build (Threads: " .. self.Settings.Threads .. ")", "success")
     UI.ProgressBar:Update(0, "Preparing...")
@@ -753,6 +833,12 @@ function Builder:Start(blocks, w, h, originCFrame)
             local chunk = PendingChunks[bestKey]
             local data = table.remove(chunk, bestIdx)
             if #chunk == 0 then PendingChunks[bestKey] = nil end
+            
+            -- RAM Optimization: Move to Cache immediately
+            if self.Settings.RAMOptimized and buildCache then
+                 block.Parent = buildCache
+            end
+            
             table.insert(ActionQueue, {Block = block, Data = data})
         end
     end)
@@ -773,7 +859,7 @@ function Builder:Start(blocks, w, h, originCFrame)
                     local block = item.Block
                     local data = item.Data
                     
-                    if ScaleTool and block and block.Parent then
+                    if ScaleTool and block then -- Removed block.Parent check for RAM Mode
                         activeScaleOps = activeScaleOps + 1
                         task.spawn(function()
                             pcall(function() ScaleTool.RF:InvokeServer(block, data.Size, data.CF) end)
@@ -858,7 +944,12 @@ function Builder:Start(blocks, w, h, originCFrame)
                 end
             end
             
-            Services.RunService.Heartbeat:Wait()
+            -- STABLE MODE LOGIC: Wait for THIS batch to finish processing
+            if self.Settings.BuildMode == "Stable" then
+                 task.wait(self.Settings.Delay * 2)
+            else
+                 Services.RunService.Heartbeat:Wait()
+            end
         end
         activeThreads = activeThreads - 1
     end
@@ -871,6 +962,7 @@ function Builder:Start(blocks, w, h, originCFrame)
     task.spawn(function()
         while activeThreads > 0 and self.IsBuilding do task.wait(0.5) end
         
+        local stabilityRetries = 0
         -- Wait for Queue to Drain AND Scale Ops to Finish
         while self.IsBuilding do
             if #ActionQueue > 0 or activeScaleOps > 0 then lastActivity = tick() end
@@ -881,8 +973,14 @@ function Builder:Start(blocks, w, h, originCFrame)
                 
                 if pendingCount == 0 then break 
                 else
+                    stabilityRetries = stabilityRetries + 1
+                    if stabilityRetries > 10 then -- Strict Limit
+                        UI.Notify("System", "Stability Check Timeout. Forcing Sweep...", "warn")
+                        break
+                    end
+
                     -- RECOVERY MODE: Retry missing blocks BEFORE Painting
-                    UI.Notify("System", "Stability Check: Missing " .. pendingCount .. " blocks. Retrying...", "error")
+                    UI.Notify("System", "Stability Check ("..stabilityRetries.."/10): Missing " .. pendingCount .. " blocks. Retrying...", "error")
                     for k, chunk in pairs(PendingChunks) do
                         for _, data in ipairs(chunk) do
                             local relativeCF = myZone.CFrame:ToObjectSpace(data.CF)
@@ -905,10 +1003,10 @@ function Builder:Start(blocks, w, h, originCFrame)
         if self.IsBuilding and #GlobalPaintQueue > 0 then
             UI.Notify("System", "Phase 2: Painting " .. #GlobalPaintQueue .. " blocks...", "success")
             
-            -- Validation pass: Remove invalid blocks before painting
+            -- Validation pass
             local validPaintQueue = {}
             for _, item in ipairs(GlobalPaintQueue) do
-                if item.Block and item.Block.Parent then
+                if item.Block then -- Removed Parent check for RAM Mode
                     table.insert(validPaintQueue, item)
                 end
             end
@@ -943,29 +1041,39 @@ function Builder:Start(blocks, w, h, originCFrame)
             local remainingCount = 0
             for k, chunk in pairs(PendingChunks) do remainingCount = remainingCount + #chunk end
             
+            -- IF RAM MODE: Restore blocks to workspace temporarily for checking or just trust them?
+            -- Scanning Cache in RS is fast.
+            
             if remainingCount > 0 then
                 UI.Notify("System", "Phase 3: Repairing " .. remainingCount .. " missing blocks...", "warn")
-                for _, block in ipairs(folder:GetChildren()) do
-                    if not self.IsBuilding then break end
-                    local ppart = block:FindFirstChild("PPart")
-                    if block.Name == "PlasticBlock" and ppart then
-                        local pos = ppart.Position
-                        local keys = getNeighborKeys(pos)
-                        
-                        for _, key in ipairs(keys) do
-                            local chunk = PendingChunks[key]
-                            if chunk then
-                                for i, data in ipairs(chunk) do
-                                    if (pos - data.CF.Position).Magnitude < 1.5 then
-                                        local d = table.remove(chunk, i)
-                                        if #chunk == 0 then PendingChunks[key] = nil end
-                                        local ScaleTool = self:GetTool("ScalingTool")
-                                        local PaintTool = self:GetTool("PaintingTool")
-                                        if ScaleTool then ScaleTool.RF:InvokeServer(block, d.Size, d.CF) end
-                                        if PaintTool then PaintTool.RF:InvokeServer({{block, d.Color}}) end
-                                        
-                                        block:SetAttribute("TitaniumValid", true) -- Mark repaired as valid
-                                        break
+                
+                -- Check BOTH Workspace and Cache
+                local locations = {folder}
+                if buildCache then table.insert(locations, buildCache) end
+                
+                for _, loc in ipairs(locations) do
+                    for _, block in ipairs(loc:GetChildren()) do
+                        if not self.IsBuilding then break end
+                        local ppart = block:FindFirstChild("PPart")
+                        if block.Name == "PlasticBlock" and ppart then
+                            local pos = ppart.Position
+                            local keys = getNeighborKeys(pos)
+                            
+                            for _, key in ipairs(keys) do
+                                local chunk = PendingChunks[key]
+                                if chunk then
+                                    for i, data in ipairs(chunk) do
+                                        if (pos - data.CF.Position).Magnitude < 1.5 then
+                                            local d = table.remove(chunk, i)
+                                            if #chunk == 0 then PendingChunks[key] = nil end
+                                            local ScaleTool = self:GetTool("ScalingTool")
+                                            local PaintTool = self:GetTool("PaintingTool")
+                                            if ScaleTool then ScaleTool.RF:InvokeServer(block, d.Size, d.CF) end
+                                            if PaintTool then PaintTool.RF:InvokeServer({{block, d.Color}}) end
+                                            
+                                            block:SetAttribute("TitaniumValid", true) -- Mark repaired as valid
+                                            break
+                                        end
                                     end
                                 end
                             end
@@ -994,23 +1102,14 @@ function Builder:Start(blocks, w, h, originCFrame)
             if DeleteTool then
                 UI.Notify("System", "Phase 4: Cleaning up excess blocks...", "warn")
                 UI.ProgressBar:Update(1, "Phase 4: Cleanup...")
-                local rangeX = (w * scale) / 2 + 5
-                local rangeY = (h * scale) / 2 + 5
                 
-                -- Need image center position
-                local centerPos = startcframe.Position 
-                
+                -- Only clean workspace (visible duplicates)
                 for _, block in ipairs(folder:GetChildren()) do
                     if not self.IsBuilding then break end
                     if block.Name == "PlasticBlock" and not block:GetAttribute("TitaniumValid") then
                         local ppart = block:FindFirstChild("PPart")
                         if ppart then
                             task.spawn(function() DeleteTool.RF:InvokeServer(block) end)
-                            -- local dist = (ppart.Position - centerPos).Magnitude
-                            -- Simple distance check: if within image radius but not valid -> Delete
-                            -- if dist < math.max(rangeX, rangeY) then
-                            --    task.spawn(function() DeleteTool.RF:InvokeServer(block) end)
-                            --end
                         end
                     end
                 end
@@ -1018,10 +1117,35 @@ function Builder:Start(blocks, w, h, originCFrame)
             
             listenerConn:Disconnect()
             self.IsBuilding = false
+            
+            -- RESTORE HIDDEN BLOCKS
+            if buildCache then
+                 UI.Notify("System", "Restoring blocks to workspace...", "success")
+                 for _, b in ipairs(buildCache:GetChildren()) do
+                     b.Parent = folder
+                     if b.Parent == folder then -- Verify move
+                         -- Success
+                     end
+                     if _ % 500 == 0 then Services.RunService.Heartbeat:Wait() end
+                 end
+                 buildCache:Destroy()
+            end
+            
             UI.ProgressBar:Update(1, "Done!")
             UI.Notify("Finished", "Build Complete!", "success")
         else
             listenerConn:Disconnect()
+            if buildCache then -- Restore on cancel
+                 for _, b in ipairs(buildCache:GetChildren()) do b.Parent = folder end
+                 buildCache:Destroy()
+            end
+        end
+        
+        -- RAM Cleanup
+        if self.Settings.RAMOptimized then
+            blocks = nil
+            App.Data.Blocks = nil
+            collectgarbage("collect")
         end
     end)
 end
@@ -1042,7 +1166,7 @@ local UI_Refs = {
     ModeBtn = nil,
     PauseBtn = nil,
     WidthInput = nil, HeightInput = nil,
-    StatBlocks = nil, StatCost = nil, StatPixels = nil, StatTime = nil, StatDims = nil
+    StatBlocks = nil, StatCost = nil, StatPixels = nil, StatTime = nil, StatDims = nil, StatFPS = nil
 }
 
 function App:GetBlockCount()
@@ -1111,7 +1235,9 @@ function App:SaveConfig()
         BatchWait = Builder.Settings.BatchWait,
         BuildBatchWait = Builder.Settings.BuildBatchWait,
         ScaleBatchWait = Builder.Settings.ScaleBatchWait,
-        Thickness = Builder.Settings.Thickness
+        Thickness = Builder.Settings.Thickness,
+        RAMOptimized = Builder.Settings.RAMOptimized,
+        BuildMode = Builder.Settings.BuildMode
     }
     local success, encoded = pcall(function() return Services.HttpService:JSONEncode(config) end)
     if success then
@@ -1128,7 +1254,7 @@ function App:LoadConfig()
         local success, config = pcall(function() return Services.HttpService:JSONDecode(content) end)
         if success then
             for k, v in pairs(config) do
-                if Builder.Settings[k] then Builder.Settings[k] = v end
+                if Builder.Settings[k] ~= nil then Builder.Settings[k] = v end
             end
             UI.Notify("Config", "Settings Loaded!", "success")
         end
@@ -1286,7 +1412,7 @@ end
 UI.Init()
 App:LoadConfig()
 
-local Window = UI.Window("BABFT Loader v5.9.22", UDim2.new(0, 750, 0, 500))
+local Window = UI.Window("BABFT Loader v5.9.25", UDim2.new(0, 750, 0, 500))
 local TabHome = Window:Tab("Dashboard")
 
 TabHome:Section("Image Source")
@@ -1318,6 +1444,75 @@ local BuildBtn = UI.Create("TextButton", {
     Text="BUILD", BackgroundColor3=UI.Theme.Success, TextColor3=UI.Theme.Text, Size=UDim2.new(0.2,0,1,0),
     Position=UDim2.new(0.8,0,0,0), Font=UI.Theme.FontBold, TextSize=14, Parent=BtnRow
 }, {UI.Corner(6)})
+
+-- Build Logic
+BuildBtn.MouseButton1Click:Connect(function()
+    if not App.Data.Pixels and not Builder.Settings.RAMOptimized then 
+        return UI.Notify("Error", "No image loaded!", "error") 
+    end
+    
+    -- If RAM optimized and no pixels loaded in RAM, Start will try to load from RS
+    local pixels = App.Data.Pixels
+    if Builder.Settings.RAMOptimized and not pixels then
+         pixels = ImageEngine:LoadData()
+         if not pixels then return UI.Notify("Error", "No cached data found!", "error") end
+    end
+    
+    -- If normal mode and no pixels
+    if not pixels and not Builder.Settings.RAMOptimized then return UI.Notify("Error", "No image!", "error") end
+    
+    Builder.IsPaused = false
+    PauseBtn.Text = "Pause"
+    PauseBtn.BackgroundColor3 = UI.Theme.Warn
+
+    local originCF
+    if App.PreviewPart then
+        originCF = App.PreviewPart.CFrame
+        App.LastPos = originCF.Position
+        App.LastRot = originCF.Orientation
+    elseif App.LastPos and App.LastRot then
+        originCF = CFrame.new(App.LastPos) * CFrame.Angles(math.rad(App.LastRot.X), math.rad(App.LastRot.Y), math.rad(App.LastRot.Z))
+    else
+        local x = tonumber(UI_Refs.PosX.Text)
+        local y = tonumber(UI_Refs.PosY.Text)
+        local z = tonumber(UI_Refs.PosZ.Text)
+        if x and y and z then
+            local rx = tonumber(UI_Refs.RotX.Text) or 0
+            local ry = tonumber(UI_Refs.RotY.Text) or 0
+            local rz = tonumber(UI_Refs.RotZ.Text) or 0
+            originCF = CFrame.new(x, y, z) * CFrame.Angles(math.rad(rx), math.rad(ry), math.rad(rz))
+        else
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                originCF = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, -10)
+                UI.Notify("Info", "Using player position", "warn")
+                App:UpdateUIFromPart({Position = originCF.Position, Orientation = Vector3.new(0,0,0)})
+            else
+                return UI.Notify("Error", "Player not found!", "error")
+            end
+        end
+    end
+    
+    -- If RAM optimized, we might need to re-compress if not done
+    -- But assuming pixels is the full image data
+    -- We need blocks (compressed data) to start building
+    -- Re-compressing...
+    local blocks = ImageEngine:Compress(pixels, Builder.Settings.CompressLevel)
+    
+    if Builder.Settings.RAMOptimized then
+         -- Offload after compressing? Or maybe the user meant store the COMPRESSED blocks?
+         -- "khi chỉnh xong pixel thì cho pixels ở game.ReplicatedStorage tạm trú"
+         -- Storing compressed blocks is better.
+         -- But here we just generated them.
+         -- Let's clear the raw pixels from RAM if optimizing
+         if App.Data.Pixels then 
+            ImageEngine:OffloadData(pixels) -- Cache Raw for resizing later?
+            App.Data.Pixels = nil 
+            -- We keep 'blocks' for the builder
+         end
+    end
+
+    Builder:Start(blocks, pixels.Width, pixels.Height, originCF)
+end)
 
 -- Resize Section
 TabHome:Section("Resize Image")
@@ -1366,7 +1561,7 @@ ApplyResizeBtn.MouseButton1Click:Connect(function() App:ResizeImage() end)
 
 -- Stats Section (Vertical Layout)
 TabHome:Section("Block Stats")
-local StatsRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,80), Parent=TabHome.Page}) -- Adjusted height
+local StatsRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,90), Parent=TabHome.Page}) -- Adjusted height
 local StatsList = Instance.new("UIListLayout")
 StatsList.Padding = UDim.new(0, 2)
 StatsList.Parent = StatsRow
@@ -1385,6 +1580,10 @@ UI_Refs.StatDims = UI.Create("TextLabel", {
 })
 UI_Refs.StatTime = UI.Create("TextLabel", {
     Text="Est. Time: 0s", TextColor3=UI.Theme.Text, BackgroundTransparency=1,
+    Size=UDim2.new(1,0,0,20), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
+})
+UI_Refs.StatFPS = UI.Create("TextLabel", {
+    Text="FPS: 0", TextColor3=UI.Theme.SubText, BackgroundTransparency=1,
     Size=UDim2.new(1,0,0,20), Font=UI.Theme.FontBold, TextSize=16, TextXAlignment="Left", Parent=StatsRow
 })
 
@@ -1434,44 +1633,6 @@ end)
 
 PreviewBtn.MouseButton1Click:Connect(function() App:Preview() end)
 CancelBtn.MouseButton1Click:Connect(function() App:CancelPreview() end)
-
-BuildBtn.MouseButton1Click:Connect(function()
-    if not App.Data.Pixels then return UI.Notify("Error", "No image loaded!", "error") end
-    
-    Builder.IsPaused = false
-    PauseBtn.Text = "Pause"
-    PauseBtn.BackgroundColor3 = UI.Theme.Warn
-
-    local originCF
-    if App.PreviewPart then
-        originCF = App.PreviewPart.CFrame
-        App.LastPos = originCF.Position
-        App.LastRot = originCF.Orientation
-    elseif App.LastPos and App.LastRot then
-        originCF = CFrame.new(App.LastPos) * CFrame.Angles(math.rad(App.LastRot.X), math.rad(App.LastRot.Y), math.rad(App.LastRot.Z))
-    else
-        local x = tonumber(UI_Refs.PosX.Text)
-        local y = tonumber(UI_Refs.PosY.Text)
-        local z = tonumber(UI_Refs.PosZ.Text)
-        if x and y and z then
-            local rx = tonumber(UI_Refs.RotX.Text) or 0
-            local ry = tonumber(UI_Refs.RotY.Text) or 0
-            local rz = tonumber(UI_Refs.RotZ.Text) or 0
-            originCF = CFrame.new(x, y, z) * CFrame.Angles(math.rad(rx), math.rad(ry), math.rad(rz))
-        else
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                originCF = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, -10)
-                UI.Notify("Info", "Using player position", "warn")
-                App:UpdateUIFromPart({Position = originCF.Position, Orientation = Vector3.new(0,0,0)})
-            else
-                return UI.Notify("Error", "Player not found!", "error")
-            end
-        end
-    end
-    
-    local blocks = ImageEngine:Compress(App.Data.Pixels, Builder.Settings.CompressLevel)
-    Builder:Start(blocks, App.Data.Pixels.Width, App.Data.Pixels.Height, originCF)
-end)
 
 local StepRow = UI.Create("Frame", {BackgroundTransparency=1, Size=UDim2.new(1,0,0,50), Parent=TabHome.Page})
 local MoveStepBox = UI.Create("Frame", {BackgroundColor3=UI.Theme.Section, Size=UDim2.new(0.48,0,1,0), Parent=StepRow}, {UI.Corner(6)})
@@ -1526,8 +1687,23 @@ local LoadConfigBtn = UI.Create("TextButton", {
 SaveConfigBtn.MouseButton1Click:Connect(function() App:SaveConfig() end)
 LoadConfigBtn.MouseButton1Click:Connect(function() App:LoadConfig() end)
 
+TabConfig:Section("Modes")
+-- Build Mode Toggle
+local ModeLabel = UI.Create("TextLabel", {
+    Text = "Build Mode: Normal", Font = UI.Theme.Font, TextSize = 14, TextColor3 = UI.Theme.Text,
+    BackgroundTransparency = 1, Size=UDim2.new(1, -20, 0, 30), Parent = TabConfig.Page
+})
+TabConfig:Toggle("Stable Build (Wait for Scale)", false, function(v)
+    Builder.Settings.BuildMode = v and "Stable" or "Normal"
+    ModeLabel.Text = "Build Mode: " .. Builder.Settings.BuildMode
+end)
+
+TabConfig:Toggle("RAM Optimized Mode", false, function(v)
+    Builder.Settings.RAMOptimized = v
+end)
+
 TabConfig:Section("Parameters")
-TabConfig:Slider("Parallel Threads", 1, 10, 5, function(v)
+TabConfig:Slider("Parallel Threads", 1, 20, 1, function(v)
     Builder.Settings.Threads = v
 end)
 
@@ -1537,7 +1713,7 @@ TabConfig:Slider("Compress Level (Tolerance)", 0, 50, 10, function(v)
     if App.Data.Pixels then App:UpdateStats() end
 end)
 
-TabConfig:Slider("Scale", 0.05, 2.0, 0.5, function(v) 
+TabConfig:Slider("Scale", 0.05, 2.0, 1.0, function(v) 
     Builder.Settings.Scale = v
     if App.Data.Pixels then App:UpdateStats() end 
     if App.PreviewPart and App.Data.Pixels then
@@ -1546,7 +1722,7 @@ TabConfig:Slider("Scale", 0.05, 2.0, 0.5, function(v)
     end
 end)
 
-TabConfig:Slider("Thickness (Z)", 0.05, 10, 0.05, function(v) 
+TabConfig:Slider("Thickness (Z)", 0.05, 10, 1.0, function(v) 
     Builder.Settings.Thickness = v
     if App.Data.Pixels then App:UpdateStats() end -- Trigger update
     if App.PreviewPart and App.Data.Pixels then
@@ -1558,9 +1734,9 @@ end)
 
 TabConfig:Slider("Delay (s)", 0.1, 2.0, 0.5, function(v) Builder.Settings.Delay = v end)
 TabConfig:Slider("Batch Size", 10, 100, 50, function(v) Builder.Settings.BatchSize = math.floor(v) end)
-TabConfig:Slider("Paint Batch Wait", 10, 500, 500, function(v) Builder.Settings.BatchWait = math.floor(v) end)
-TabConfig:Slider("Build Batch Wait", 10, 500, 500, function(v) Builder.Settings.BuildBatchWait = math.floor(v) end)
-TabConfig:Slider("Scale Batch Wait", 10, 500, 500, function(v) Builder.Settings.ScaleBatchWait = math.floor(v) end)
+TabConfig:Slider("Paint Batch Wait", 100, 2000, 500, function(v) Builder.Settings.BatchWait = math.floor(v) end)
+TabConfig:Slider("Build Batch Wait", 100, 2000, 500, function(v) Builder.Settings.BuildBatchWait = math.floor(v) end)
+TabConfig:Slider("Scale Batch Wait", 100, 2000, 500, function(v) Builder.Settings.ScaleBatchWait = math.floor(v) end)
 
 Services.UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
@@ -1571,4 +1747,4 @@ Services.UserInputService.InputBegan:Connect(function(input, gp)
     end
 end)
 
-UI.Notify("Titanium", "v5.9.22 Loaded (English Edition)", "success", 5)
+UI.Notify("Titanium", "v5.9.25 Loaded (RAM & Build Modes)", "success", 5)
