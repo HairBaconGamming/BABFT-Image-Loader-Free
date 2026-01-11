@@ -5,10 +5,9 @@
 ## **📥 Installation (Script Loader)**
 
 Copy the code below and paste it into your Executor (Krnl, Fluxus, Delta, etc.):
-
-loadstring(game:HttpGet("YOUR\_RAW\_GITHUB\_LINK\_HERE"))()
-
-*(Note: Replace the link above with the actual Raw link from your GitHub repository)*
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/HairBaconGamming/BABFT-Image-Loader-Free/refs/heads/main/Main.lua"))()
+```
 
 ## **🔥 Key Features (v7.3.0)**
 
